@@ -36,7 +36,8 @@ probability = 60
 all_sprites = pygame.sprite.Group()
 arrows = pygame.sprite.Group()
 items = pygame.sprite.Group()
-
+player_group = pygame.sprite.Group()
+invincible_group = pygame.sprite.Group()
 
 class DefaultArrow(pygame.sprite.Sprite):
     """화살 객체(위->아래)"""
@@ -160,36 +161,68 @@ class Player(pygame.sprite.Sprite):
 class Item(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = None
+        self.image = pygame.transform.scale(pygame.image.load("star.png"), (30, 30))  # 기본값: 별 (무적 아이템)
         self.rect = self.image.get_rect()
         self.width = self.image.get_width()
         self.height = self.image.get_height()
 
-    def update(self):
-        pass
 
-
-class Invincible(Item):
+# 이거 위치 조정해야됨.
+class InvincibleItem(Item):
     """3초 동안 무적"""
     def __init__(self):
         super().__init__()
+        self.rect = self.image.get_rect()
+        self.rect.x = center[0] + 40
+        self.rect.y = center[1] + 40
+
+
+class InvincbleItemCollision(pygame.sprite.Sprite):
+    def __init__(self, sprite1, group1, group2):
+        super().__init__(group1)
+        self.playersprite = sprite1
+        # MySprite 클래스의 속성 초기화
+        self.collision_time = 0
+        self.invincibleitemgroup = group2
+
+    def update(self):
+        # 충돌 검사
+        if pygame.sprite.spritecollide(self.playersprite, self.invincibleitemgroup, True):
+            # 충돌이 발생한 시간 저장
+            self.collision_time = pygame.time.get_ticks()
+
+            # 충돌한 sprite2 찾기
+            for sprite2 in pygame.sprite.spritecollide(self.playersprite, self.invincibleitemgroup, False):
+                sprite2.kill()
+
+        # 일정 시간이 지나면 속성 변경
+        if self.collision_time > 0 and pygame.time.get_ticks() - self.collision_time < 4000:  # 4초 지속
+            self.playersprite.invincible = True
+        else:
+            self.playersprite.invincible = False
+
+
 
 def game_over():
+    global level, current_score, elapsed_time
     """게임 종료 함수"""
     # Game over screen
     game_over_page_font = pygame.font.SysFont(None, 50)
     game_over_text = game_over_page_font.render("Game Over", True, (0, 0, 0))
     game_over_rect = game_over_text.get_rect()
     game_over_rect.center = (screen_width / 2, screen_height / 2 - 50)
-
+    
+    # 이번 게임 score
     score_text = game_over_page_font.render(f"Score: {current_score}", True, (0, 0, 0))
     score_text_rect = score_text.get_rect()
     score_text_rect.center = (screen_width / 2 - 8, screen_height / 2 + 10)
-
+    
+    # 이번 게임 경과 시간
     time_text = game_over_page_font.render("time: {:02d}:{:02d}".format(elapsed_time // 60, elapsed_time % 60), True, (0, 0, 0))
     time_text_rect = score_text.get_rect()
     time_text_rect.center = (screen_width / 2 - 13, screen_height / 2 + 50)
-
+    
+    # 이번 게임 최대 레벨
     level_text = game_over_page_font.render(f"Level: {level}", True, (0, 0, 0))
     level_text_rect = level_text.get_rect()
     level_text_rect.center = (screen_width / 2 - 26, screen_height / 2 + 90)
@@ -208,6 +241,14 @@ def game_over():
     show_score.set(f"최고 점수: {str(top_score)}")
     show_time.set("최고 시간: {:02d}:{:02d}".format(max_time // 60, max_time % 60))
 
+
+    level = 1
+    current_score = 0
+    elapsed_time = 0
+    all_sprites.empty()
+    items.empty()
+    arrows.empty()
+
 def game_start():
     """게임 시작 함수"""
     pygame.init()
@@ -217,15 +258,20 @@ def game_start():
     pygame.display.set_caption("화살 피하기 게임")
     bg_img = pygame.transform.scale(pygame.image.load("background.jpg"), (screen_width, screen_height))
     screen.blit(bg_img, (0, 0))
-    #screen.fill((255, 255, 255))  #   # 배경
-
-
 
     player = Player()
     all_sprites.add(player)
+    player_group.add(player)
+
+    invincibleitem = InvincibleItem()
+    all_sprites.add(invincibleitem)
+    items.add(invincibleitem)
+    invincible_group.add(invincibleitem)
+
+    item_invincible_collision = InvincbleItemCollision(player, player_group, invincible_group)
+    player_group.add(item_invincible_collision)
 
     clock = pygame.time.Clock()
-
     running = True
     start_time = pygame.time.get_ticks()  # 경과 시간 표시하기 위해 가져옴.
     level_up_time = 7000
@@ -246,8 +292,8 @@ def game_start():
             if event.type == pygame.QUIT:
                 running = False
 
-        global probability
         # 화살 랜덤 생성 (확률을 randint로 조정)
+        global probability
         arrow_select = random.randint(1, probability)
         if len(arrows.sprites()) < max_num_arrows:
             if arrow_select == 1:
@@ -294,16 +340,21 @@ def game_start():
 
         screen.blit(text, (10, 40))
 
-        if pygame.sprite.spritecollide(player, items, True):
-            pass
+        if player.invincible:
+            invincible_text = font.render("INVINCIBLE!!", True, (255, 255, 255))
+            screen.blit(invincible_text, (10, 100))
+
         # 충돌시 중지
-        if pygame.sprite.spritecollide(player, arrows, True) and not player.invincible:
-            running = False
+        if pygame.sprite.spritecollide(player, arrows, True):
+            if player.invincible:
+                current_score += 1
+            else:
+                running = False
 
         # 게임 로직 업데이트
-        player.update()
+        player_group.update()
         arrows.update()
-
+        items.update()
         # 게임 화면 그리기
         all_sprites.draw(screen)
         pygame.display.update()
@@ -318,12 +369,6 @@ def game_start():
         max_level = level
 
     game_over()
-    level = 1
-    current_score = 0
-    elapsed_time = 0
-    all_sprites.empty()
-    items.empty()
-    arrows.empty()
 
 def terminate():
     """tkinter 종료 (전체 프로그램 종료) 함수"""
