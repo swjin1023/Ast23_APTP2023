@@ -29,6 +29,9 @@ level = 1
 max_level = 1
 global show_level
 global screen  # pygame screen
+max_num_arrows = 15 * level
+
+probability = 60
 
 all_sprites = pygame.sprite.Group()
 arrows = pygame.sprite.Group()
@@ -43,7 +46,7 @@ class DefaultArrow(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()  # 화살 이미지 좌측 상단 모서리의 x, y 좌표 가져옴
         self.width = self.image.get_width()  # 화살 너비
         self.height = self.image.get_height()  # 화살 높이
-        self.rect.x = random.randint(self.width, screen_width - self.width)  # 화살 x좌표 변경
+        self.rect.x = random.randint(center[0] - radius, center[0] + radius - self.width)  # 화살 x좌표 변경
         self.rect.y = 0  # 화살 y좌표 변경
 
         # 화살 이동 속도
@@ -56,7 +59,7 @@ class DefaultArrow(pygame.sprite.Sprite):
     def update(self):  # 게임 frame당 변화
         # 화살 이동
         for i in range(0, level):
-            self.rect.y += self.dy # 기본값은 위에서 아래로 내려오는 것.
+            self.rect.y += self.dy  # 기본값은 위에서 아래로 내려오는 것.
             if self.rect.y > screen_height:  # 화면 밖으로 나갔는지 확인
                 self.kill()  # 객체 삭제
                 global current_score
@@ -69,7 +72,7 @@ class LeftArrow(DefaultArrow):
         super().__init__()
         self.image = pygame.transform.rotate(self.image, 90)
         self.rect.x = 0  # 화살 x좌표 변경
-        self.rect.y = random.randint(self.height, screen_height - self.height) # 화살 y좌표 변경
+        self.rect.y = random.randint(center[1] - radius, center[1] + radius - self.height) # 화살 y좌표 변경
 
     def update(self):
         for i in range(0, level):
@@ -85,7 +88,7 @@ class RightArrow(DefaultArrow):
         super().__init__()
         self.image = pygame.transform.rotate(self.image, -90)
         self.rect.x = screen_width - self.width  # 화살 x좌표 변경
-        self.rect.y = random.randint(self.height, screen_height - self.height) # 화살 y좌표 변경
+        self.rect.y = random.randint(center[1] - radius, center[1] + radius - self.height) # 화살 y좌표 변경
 
     def update(self):
         for i in range(0, level):
@@ -99,14 +102,13 @@ class BottomArrow(DefaultArrow):
     def __init__(self):
         super().__init__()
         self.image = pygame.transform.flip(self.image, False, True)
-        self.rect.x = random.randint(self.width, screen_width - self.width)  # 화살 x좌표 변경
-        self.rect.y = screen_height - self.height # 화살 y좌표 변경
+        self.rect.x = random.randint(center[0] - radius, center[0] + radius - self.width)  # 화살 x좌표 변경
+        self.rect.y = screen_height - self.height  # 화살 y좌표 변경
 
     def update(self):
         # 화살 이동
-        self.rect.y -= self.dy
-
         for i in range(0, level):
+            self.rect.y -= self.dy
         # 화면 밖으로 나갔는지 확인
             if self.rect.y < 0:
                 self.kill()
@@ -244,24 +246,26 @@ def game_start():
             if event.type == pygame.QUIT:
                 running = False
 
+        global probability
         # 화살 랜덤 생성 (확률을 randint로 조정)
-        arrow_select = random.randint(1, 40)
-        if arrow_select == 1:
-            new_arrow = DefaultArrow()
-            arrows.add(new_arrow)
-            all_sprites.add(new_arrow)
-        elif arrow_select == 6:
-            new_arrow = LeftArrow()
-            arrows.add(new_arrow)
-            all_sprites.add(new_arrow)
-        elif arrow_select == 11:
-            new_arrow = RightArrow()
-            arrows.add(new_arrow)
-            all_sprites.add(new_arrow)
-        elif arrow_select == 16:
-            new_arrow = BottomArrow()
-            arrows.add(new_arrow)
-            all_sprites.add(new_arrow)
+        arrow_select = random.randint(1, probability)
+        if len(arrows.sprites()) < max_num_arrows:
+            if arrow_select == 1:
+                new_arrow = DefaultArrow()
+                arrows.add(new_arrow)
+                all_sprites.add(new_arrow)
+            elif arrow_select == 2:
+                new_arrow = LeftArrow()
+                arrows.add(new_arrow)
+                all_sprites.add(new_arrow)
+            elif arrow_select == 3:
+                new_arrow = RightArrow()
+                arrows.add(new_arrow)
+                all_sprites.add(new_arrow)
+            elif arrow_select == 4:
+                new_arrow = BottomArrow()
+                arrows.add(new_arrow)
+                all_sprites.add(new_arrow)
 
         
         # 현재 점수 표시
@@ -284,6 +288,8 @@ def game_start():
 
         if seconds > 0 and (temp - start_time) >= level_up_time:
             level += 1
+            if probability > 15:
+                probability -= 11
             level_up_time += 7000
 
         screen.blit(text, (10, 40))
@@ -291,7 +297,7 @@ def game_start():
         if pygame.sprite.spritecollide(player, items, True):
             pass
         # 충돌시 중지
-        if pygame.sprite.spritecollide(player, arrows, True) and player.invincible == False:
+        if pygame.sprite.spritecollide(player, arrows, True) and not player.invincible:
             running = False
 
         # 게임 로직 업데이트
