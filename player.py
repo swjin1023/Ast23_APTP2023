@@ -1,22 +1,25 @@
 import pygame
+import consts
 
 
 class Player(pygame.sprite.Sprite):
     """player 객체"""
-    def __init__(self, _center, _player_speed, _radius):
+
+    def __init__(self):
         super().__init__()
         self.image = pygame.transform.scale(pygame.image.load("target.png"), (20, 20))
         self.rect = self.image.get_rect()
         self.width = self.image.get_width()
         self.height = self.image.get_height()
 
-        self.center = _center
-        self.player_speed = _player_speed
-        self.radius = _radius
+        self.center = consts.data_constant["center"]
+        self.player_speed = consts.data_constant["player_speed"]
+        self.radius = consts.data_constant["radius"]
 
         # 초기 위치: 중앙
         self.rect.x = self.center[0]
         self.rect.y = self.center[1]
+
         # 객체 이동속도
         self.speed = self.player_speed
 

@@ -75,8 +75,7 @@ def game_start():
     player_group = pygame.sprite.Group()
     invincible_group = pygame.sprite.Group()
 
-    player = pl.Player(consts.data_constant["center"], consts.data_constant["player_speed"],
-                       consts.data_constant["radius"])
+    player = pl.Player()
     all_sprites.add(player)
     player_group.add(player)
 
