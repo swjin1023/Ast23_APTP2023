@@ -21,8 +21,8 @@ class InvincibleItem(Item):
 
 
 class InvincbleItemCollision(pygame.sprite.Sprite):
-    def __init__(self, player, player_group, item_group):
-        super().__init__(player_group)  # player group으로부터 상속
+    def __init__(self, player, item_group):
+        super().__init__()  # player group으로부터 상속
         self.player_sprite = player
         self.collision_time = 0
         self.invincible_item_group = item_group
