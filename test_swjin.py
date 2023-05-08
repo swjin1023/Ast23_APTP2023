@@ -2,6 +2,7 @@ import sys
 import pygame
 import random
 import tkinter as tk
+
 # 스크린 정보
 screen_width = 1000
 screen_height = 800
@@ -39,11 +40,14 @@ items = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 invincible_group = pygame.sprite.Group()
 
+
 class Arrow(pygame.sprite.Sprite):
     """화살 객체(위->아래)"""
+
     def __init__(self, _radius, _center: tuple, _screen_height, _screen_width, _current_score, _arrow_speed, _level):
         super().__init__()
-        self.image = pygame.transform.flip(pygame.transform.scale(pygame.image.load("arrow.png"), (10, 30)), False, True) # 이미지 가져오기
+        self.image = pygame.transform.flip(pygame.transform.scale(pygame.image.load("arrow.png"), (10, 30)), False,
+                                           True)  # 이미지 가져오기
         self.rect = self.image.get_rect()  # 화살 이미지 좌측 상단 모서리의 x, y 좌표 가져옴
         self.width = self.image.get_width()  # 화살 너비
         self.height = self.image.get_height()  # 화살 높이
@@ -55,12 +59,13 @@ class Arrow(pygame.sprite.Sprite):
         self.current_score = _current_score
         self.level = _level
 
-        self.rect.x = random.randint(self.center[0] - self.radius, self.center[0] + self.radius - self.width)  # 화살 x좌표 변경
+        self.rect.x = random.randint(self.center[0] - self.radius,
+                                     self.center[0] + self.radius - self.width)  # 화살 x좌표 변경
         self.rect.y = 0  # 화살 y좌표 변경
 
         # 화살 이동 속도
         self.speed = _arrow_speed
-        
+
         # 화살 delta값
         self.dx = self.speed
         self.dy = self.speed
@@ -75,8 +80,10 @@ class Arrow(pygame.sprite.Sprite):
                 self.current_score += 1
         # 왼쪽 위가 (0,0)이다!
 
+
 class LeftArrow(Arrow):
     """화살 객체(왼쪽->오른쪽)"""
+
     def __init__(self):
         super().__init__()
         self.image = pygame.transform.rotate(self.image, 90)
@@ -91,13 +98,15 @@ class LeftArrow(Arrow):
                 global current_score
                 current_score += 1
 
+
 class RightArrow(Arrow):
     """화살 객체(오른쪽->왼쪽)"""
+
     def __init__(self):
         super().__init__()
         self.image = pygame.transform.rotate(self.image, -90)
         self.rect.x = screen_width - self.width  # 화살 x좌표 변경
-        self.rect.y = random.randint(center[1] - radius, center[1] + radius - self.height) # 화살 y좌표 변경
+        self.rect.y = random.randint(center[1] - radius, center[1] + radius - self.height)  # 화살 y좌표 변경
 
     def update(self):
         for i in range(0, level):
@@ -106,6 +115,7 @@ class RightArrow(Arrow):
                 self.kill()
                 global current_score
                 current_score += 1
+
 
 class BottomArrow(Arrow):
     def __init__(self):
@@ -118,14 +128,16 @@ class BottomArrow(Arrow):
         # 화살 이동
         for i in range(0, level):
             self.rect.y -= self.dy
-        # 화면 밖으로 나갔는지 확인
+            # 화면 밖으로 나갔는지 확인
             if self.rect.y < 0:
                 self.kill()
                 global current_score
                 current_score += 1
 
+
 class Player(pygame.sprite.Sprite):
     """player 객체"""
+
     def __init__(self):
         super().__init__()
         self.image = pygame.transform.scale(pygame.image.load("target.png"), (20, 20))
@@ -143,7 +155,7 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         # 목표물 이동
-        status = (self.rect.x-center[0]) ** 2 + (self.rect.y - center[1])**2
+        status = (self.rect.x - center[0]) ** 2 + (self.rect.y - center[1]) ** 2
         x_before, y_before = self.rect.x, self.rect.y
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and status < radius ** 2:
@@ -158,14 +170,14 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_DOWN] and status < radius ** 2:
             self.rect.y += self.speed
 
-        status = (self.rect.x-center[0]) ** 2 + (self.rect.y - center[1])**2
+        status = (self.rect.x - center[0]) ** 2 + (self.rect.y - center[1]) ** 2
         if status >= radius ** 2:
             self.rect.x = x_before
             self.rect.y = y_before
 
-
         # 화살과 충돌 여부 확인
-        
+
+
 class Item(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -178,6 +190,7 @@ class Item(pygame.sprite.Sprite):
 # 이거 위치 조정해야됨.
 class InvincibleItem(Item):
     """3초 동안 무적"""
+
     def __init__(self):
         super().__init__()
         self.rect = self.image.get_rect()
@@ -210,7 +223,6 @@ class InvincbleItemCollision(pygame.sprite.Sprite):
             self.playersprite.invincible = False
 
 
-
 def game_over():
     global level, current_score, elapsed_time
     """게임 종료 함수"""
@@ -219,17 +231,18 @@ def game_over():
     game_over_text = game_over_page_font.render("Game Over", True, (0, 0, 0))
     game_over_rect = game_over_text.get_rect()
     game_over_rect.center = (screen_width / 2, screen_height / 2 - 50)
-    
+
     # 이번 게임 score
     score_text = game_over_page_font.render(f"Score: {current_score}", True, (0, 0, 0))
     score_text_rect = score_text.get_rect()
     score_text_rect.center = (screen_width / 2 - 8, screen_height / 2 + 10)
-    
+
     # 이번 게임 경과 시간
-    time_text = game_over_page_font.render("time: {:02d}:{:02d}".format(elapsed_time // 60, elapsed_time % 60), True, (0, 0, 0))
+    time_text = game_over_page_font.render("time: {:02d}:{:02d}".format(elapsed_time // 60, elapsed_time % 60), True,
+                                           (0, 0, 0))
     time_text_rect = score_text.get_rect()
     time_text_rect.center = (screen_width / 2 - 13, screen_height / 2 + 50)
-    
+
     # 이번 게임 최대 레벨
     level_text = game_over_page_font.render(f"Level: {level}", True, (0, 0, 0))
     level_text_rect = level_text.get_rect()
@@ -249,13 +262,13 @@ def game_over():
     show_score.set(f"최고 점수: {str(top_score)}")
     show_time.set("최고 시간: {:02d}:{:02d}".format(max_time // 60, max_time % 60))
 
-
     level = 1
     current_score = 0
     elapsed_time = 0
     all_sprites.empty()
     items.empty()
     arrows.empty()
+
 
 def game_start():
     """게임 시작 함수"""
@@ -321,7 +334,6 @@ def game_start():
                 arrows.add(new_arrow)
                 all_sprites.add(new_arrow)
 
-        
         # 현재 점수 표시
         font = pygame.font.SysFont(None, 30)
         score_text = font.render("Score: " + str(current_score), True, (255, 255, 255))
@@ -378,21 +390,25 @@ def game_start():
 
     game_over()
 
+
 def terminate():
     """tkinter 종료 (전체 프로그램 종료) 함수"""
     root.destroy()
     sys.exit()
 
+
 # tkinter 말고 다른 좋은 UI쓰는 것도 좋아요! tkinter는 한번 써봤어서 급조한 UI에요.
 class UI(tk.Frame):
     """메인 화면(tkinter) UI class"""
+
     def __init__(self, master):
         super().__init__(master)
         master.geometry("350x350")
         master.title("화살 피하기")
         title_label = tk.Label(master, text="짭림고수", width=9, font=("Helvetica", 14))
         title_label.pack(side="top")
-        game_start_button = tk.Button(master, height=4, width=8, text="게임 시작!", font=("Helvetica", 14), command=game_start)
+        game_start_button = tk.Button(master, height=4, width=8, text="게임 시작!", font=("Helvetica", 14),
+                                      command=game_start)
         game_start_button.pack(side="left")
 
         exit_button = tk.Button(master, height=4, width=8, text="게임 종료", font=("Helvetica", 14), command=terminate)
