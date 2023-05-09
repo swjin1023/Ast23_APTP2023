@@ -75,15 +75,16 @@ def game_start():
     items = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
     invincible_group = pygame.sprite.Group()
+    instantkill_group = pygame.sprite.Group()
 
     player = pl.Player()
     all_sprites.add(player)
     player_group.add(player)
-
-    invincible_item = Item.InvincibleItem()
-    all_sprites.add(invincible_item)
-    items.add(invincible_item)
-    invincible_group.add(invincible_item)
+#난이도 올라갈때마다 템 하나씩 생성되도록 시작시 템 생성 막음
+    # invincible_item = Item.InvincibleItem()
+    # all_sprites.add(invincible_item)
+    # items.add(invincible_item)
+    # invincible_group.add(invincible_item)
 
     item_invincible_collision = Item.InvincbleItemCollision(player, invincible_group)
     player_group.add(item_invincible_collision)
@@ -150,6 +151,22 @@ def game_start():
 
         if seconds > 0 and (temp - start_time) >= level_up_time:
             variables.level[0] += 1
+            #난이도 올라갈떄마다 아이템 추가하도록 업데이트
+
+            tempnum = random.randint(0, 10)
+            if tempnum > 100:
+                instantkill_item = Item.InstantkillItem()
+                all_sprites.add(instantkill_item)
+                items.add(instantkill_item)
+                instantkill_group.add(instantkill_item)
+
+            else:
+                invincible_item = Item.InvincibleItem()
+                all_sprites.add(invincible_item)
+                items.add(invincible_item)
+                invincible_group.add(invincible_item)
+
+
             if variables.probability[0] > 15:
                 variables.probability[0] -= 7
             level_up_time += 7000
