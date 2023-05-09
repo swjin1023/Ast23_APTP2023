@@ -89,6 +89,9 @@ def game_start():
     item_invincible_collision = Item.InvincbleItemCollision(player, invincible_group)
     player_group.add(item_invincible_collision)
 
+    item_instantkill_collision = Item.InvincbleItemCollision(player, invincible_group)
+    player_group.add(item_instantkill_collision)
+
     clock = pygame.time.Clock()
     start_time = pygame.time.get_ticks()  # 경과 시간 표시하기 위해 가져옴.
     level_up_time = 7000
@@ -154,7 +157,7 @@ def game_start():
             #난이도 올라갈떄마다 아이템 추가하도록 업데이트
 
             tempnum = random.randint(0, 10)
-            if tempnum > 100:
+            if tempnum < 100:
                 instantkill_item = Item.InstantkillItem()
                 all_sprites.add(instantkill_item)
                 items.add(instantkill_item)
@@ -181,6 +184,8 @@ def game_start():
                 variables.current_score[0] += 1
             else:
                 running = False
+        if pygame.sprite.spritecollide(player, instantkill_group, True):
+            running = False
 
         # 게임 로직 업데이트
         player_group.update()

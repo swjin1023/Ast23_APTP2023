@@ -85,5 +85,6 @@ class IntantkillItemCollision(pygame.sprite.Sprite):
             self.collision_time = pygame.time.get_ticks()
 
             # 충돌한 sprite2(Item) 찾기
-            if pygame.sprite.spritecollide(self.player_sprite, self.instantkill_item_group, False):
-                self.player_sprite.kill()
+            for sprite2 in pygame.sprite.spritecollide(self.player_sprite, self.instantkill_item_group, False):
+                sprite2.kill()
+
