@@ -50,8 +50,9 @@ def game_over():
 
     # Quit pygame
     pygame.quit()
-    variables.show_score.set(f"최고 점수: {str(variables.top_score[0])}")
+    variables.show_score.set(f"최고 점수: {variables.top_score[0]}")
     variables.show_time.set("최고 시간: {:02d}:{:02d}".format(variables.max_time[0] // 60, variables.max_time[0] % 60))
+    variables.show_level.set(f"최고 레벨: {variables.max_level[0]}")
 
     variables.level[0] = 1
     variables.current_score[0] = 0
