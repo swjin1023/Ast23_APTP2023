@@ -22,7 +22,7 @@ class UI(tk.Frame):
                                 command=self.terminate)
         exit_button.pack(side="right")
 
-        variables.show_score.set(f"최고 점수: {str(variables.top_score[0])}")
+        variables.show_score.set(f"최고 점수: {variables.top_score[0]}")
         score_label = tk.Label(master, textvariable=variables.show_score, font=("Helvetica", 14))
         score_label.pack(side="bottom")
 
