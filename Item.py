@@ -71,7 +71,7 @@ class InvincbleItemCollision(pygame.sprite.Sprite):
             self.player_sprite.invincible = False
 
 #즉사 아이템 충돌검사(충돌시 사망)
-class IntantkillItemCollision(pygame.sprite.Sprite):
+class InstantkillItemCollision(pygame.sprite.Sprite):
     def __init__(self, player, item_group):
         super().__init__()  # player group으로부터 상속
         self.player_sprite = player

@@ -89,7 +89,7 @@ def game_start():
     item_invincible_collision = Item.InvincbleItemCollision(player, invincible_group)
     player_group.add(item_invincible_collision)
 
-    item_instantkill_collision = Item.InvincbleItemCollision(player, invincible_group)
+    item_instantkill_collision = Item.InstantItemCollision(player, instantkill_group)
     player_group.add(item_instantkill_collision)
 
     clock = pygame.time.Clock()
@@ -157,7 +157,8 @@ def game_start():
             #난이도 올라갈떄마다 아이템 추가하도록 업데이트
 
             tempnum = random.randint(0, 10)
-            if tempnum < 100:
+            if tempnum%10 == 4 or 5:
+                #즉사아이템 확률조정
                 instantkill_item = Item.InstantkillItem()
                 all_sprites.add(instantkill_item)
                 items.add(instantkill_item)
