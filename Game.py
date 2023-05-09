@@ -84,7 +84,7 @@ def game_start():
     items.add(invincible_item)
     invincible_group.add(invincible_item)
 
-    item_invincible_collision = Item.InvincbleItemCollision(player, player_group, invincible_group)
+    item_invincible_collision = Item.InvincbleItemCollision(player, invincible_group)
     player_group.add(item_invincible_collision)
 
     clock = pygame.time.Clock()
