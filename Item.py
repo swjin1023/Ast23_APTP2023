@@ -1,5 +1,8 @@
 import pygame
 import consts
+import random
+import player
+
 
 class Item(pygame.sprite.Sprite):
     def __init__(self):
@@ -13,11 +16,20 @@ class Item(pygame.sprite.Sprite):
 # 이거 위치 조정해야됨.
 class InvincibleItem(Item):
     """3초 동안 무적"""
+
     def __init__(self):
         super().__init__()
         self.rect = self.image.get_rect()
-        self.rect.x = consts.data_constant["center"][0] + 40
-        self.rect.y = consts.data_constant["center"][1] + 40
+        self.tempx = 0
+        self.tempy = 0
+        while (self.tempx -consts.data_constant["center"][0]) ** 2 + (self.tempy -consts.data_constant["center"][1]) ** 2 >= consts.data_constant["radius"] ** 2:
+            self.tempx = random.randint(500 - (consts.data_constant["radius"] - self.rect.width),
+                                   500 + (consts.data_constant["radius"] - self.rect.width))
+            self.tempy = random.randint(400 - (400 + consts.data_constant["radius"] - self.rect.height),
+                                   (400 + consts.data_constant["radius"] - self.rect.height))
+
+        self.rect.x = self.tempx
+        self.rect.y = self.tempy
 
 
 class InvincbleItemCollision(pygame.sprite.Sprite):
@@ -42,6 +54,3 @@ class InvincbleItemCollision(pygame.sprite.Sprite):
             self.player_sprite.invincible = True
         else:
             self.player_sprite.invincible = False
-
-
-
