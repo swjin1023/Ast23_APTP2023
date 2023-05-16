@@ -50,9 +50,8 @@ def game_over():
 
     # Quit pygame
     pygame.quit()
-    variables.show_score.set(f"최고 점수: {variables.top_score[0]}")
+    variables.show_score.set(f"최고 점수: {str(variables.top_score)}")
     variables.show_time.set("최고 시간: {:02d}:{:02d}".format(variables.max_time[0] // 60, variables.max_time[0] % 60))
-    variables.show_level.set(f"최고 레벨: {variables.max_level[0]}")
 
     variables.level[0] = 1
     variables.current_score[0] = 0
@@ -98,8 +97,8 @@ def game_start():
         screen.blit(bg_img, (0, 0))
 
         # 가운데 원 그리기
-        pygame.draw.circle(screen, consts.data_constant["circle_color"], consts.data_constant["center"],
-                           consts.data_constant["radius"], consts.data_constant["circle_width"])
+        pygame.draw.circle(screen, consts.data_constant["circle_color"], consts.data_constant["center"], consts.data_constant["radius"],
+                           consts.data_constant["circle_width"])
         pygame.draw.circle(screen, (0, 0, 0), consts.data_constant["center"],
                            consts.data_constant["radius"] - consts.data_constant["circle_width"])
         # FPS
@@ -141,8 +140,7 @@ def game_start():
         variables.elapsed_time[0] = (temp - start_time) // 1000  # 밀리초를 초 단위로 변환
         minutes = variables.elapsed_time[0] // 60  # 분 계산
         seconds = variables.elapsed_time[0] % 60  # 초 계산
-        time_text = font.render("{:02d}:{:02d}".format(minutes, seconds), True, (255, 255, 255))
-        screen.blit(time_text, (10, 40))
+        text = font.render("{:02d}:{:02d}".format(minutes, seconds), True, (255, 255, 255))
 
         # 현재 레벨 표시
         level_text = font.render(f"Level: {variables.level[0]}", True, (255, 255, 255))
@@ -153,6 +151,8 @@ def game_start():
             if variables.probability[0] > 15:
                 variables.probability[0] -= 7
             level_up_time += 7000
+
+        screen.blit(text, (10, 40))
 
         if player.invincible:
             invincible_text = font.render("INVINCIBLE!!", True, (255, 255, 255))
