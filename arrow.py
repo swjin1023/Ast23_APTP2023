@@ -3,7 +3,6 @@ import random
 import consts
 import variables
 
-
 class Arrow(pygame.sprite.Sprite):
     """화살 객체 Parent"""
 
@@ -15,11 +14,11 @@ class Arrow(pygame.sprite.Sprite):
         self.width = self.image.get_width()  # 화살 너비
         self.height = self.image.get_height()  # 화살 높이
 
-        self.screen_height = consts.data_constant["screen_height"]
-        self.screen_width = consts.data_constant["screen_width"]
-        self.radius = consts.data_constant["radius"]
-        self.center = consts.data_constant["center"]
-        self.speed = consts.data_constant["arrow_speed"]  # 화살 이동 속도
+        self.screen_height = consts.const["screen_height"]
+        self.screen_width = consts.const["screen_width"]
+        self.radius = consts.const["radius"]
+        self.center = consts.const["center"]
+        self.speed = consts.const["arrow_speed"]  # 화살 이동 속도
         self.level = variables.level[0]
 
         # 화살 delta값
@@ -99,3 +98,6 @@ class BottomArrow(Arrow):
             if self.rect.y < 0:
                 self.kill()
                 variables.current_score[0] += 1
+
+
+
