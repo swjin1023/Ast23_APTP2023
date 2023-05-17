@@ -12,191 +12,7 @@ import consts
 global screen
 
 
-
-def game_over():
-    """게임 종료 함수"""
-    # Game over screen
-    game_over_page_font = pygame.font.SysFont(None, 50)
-    game_over_text = game_over_page_font.render("Game Over", True, (0, 0, 0))
-    game_over_rect = game_over_text.get_rect()
-    game_over_rect.center = (consts.const["screen_width"] / 2, consts.const["screen_height"] / 2 - 50)
-
-    # 이번 게임 score
-    score_text = game_over_page_font.render(f"Score: {variables.current_score[0]}", True, (0, 0, 0))
-    score_text_rect = score_text.get_rect()
-    score_text_rect.center = (consts.const["screen_width"] / 2 - 8,
-                              consts.const["screen_height"] / 2 + 10)
-
-    # 이번 게임 경과 시간
-    time_text = game_over_page_font.render("time: {:02d}:{:02d}".format(variables.elapsed_time[0] // 60,
-                                                                        variables.elapsed_time[0] % 60),
-                                           True, (0, 0, 0))
-    time_text_rect = score_text.get_rect()
-    time_text_rect.center = (consts.const["screen_width"] / 2 - 13,
-                             consts.const["screen_height"] / 2 + 50)
-
-    # 이번 게임 최대 레벨
-    level_text = game_over_page_font.render(f"Level: {variables.level[0]}", True, (0, 0, 0))
-    level_text_rect = level_text.get_rect()
-    level_text_rect.center = (consts.const["screen_width"] / 2 - 26,
-                              consts.const["screen_height"] / 2 + 90)
-
-    screen.fill((255, 255, 255))
-    screen.blit(game_over_text, game_over_rect)
-    screen.blit(score_text, score_text_rect)
-    screen.blit(time_text, time_text_rect)
-    screen.blit(level_text, level_text_rect)
-
-    pygame.display.update()
-    pygame.time.wait(2000)
-
-    # Quit pygame
-    pygame.quit()
-    variables.show_score.set(f"최고 점수: {str(variables.top_score)}")
-    variables.show_time.set("최고 시간: {:02d}:{:02d}".format(variables.max_time[0] // 60, variables.max_time[0] % 60))
-
-    variables.level[0] = 1
-    variables.current_score[0] = 0
-    variables.elapsed_time[0] = 0
-
-
-def game_start():
-    """게임 시작 함수"""
-    pygame.init()
-    global screen
-    screen = pygame.display.set_mode(
-        (consts.const["screen_width"], consts.const["screen_height"]))  # pygame screen
-    pygame.display.set_caption("화살 피하기 게임")
-    bg_img = pygame.transform.scale(pygame.image.load("background.jpg"),
-                                    (consts.const["screen_width"], consts.const["screen_height"]))
-    screen.blit(bg_img, (0, 0))
-
-    all_sprites = pygame.sprite.Group()
-    arrows = pygame.sprite.Group()
-    items = pygame.sprite.Group()
-    player_group = pygame.sprite.Group()
-    invincible_group = pygame.sprite.Group()
-    instantkill_group = pygame.sprite.Group()
-
-    player = pl.Player()
-    player_group.add(player)
-    all_sprites.add(player_group)
-
-    item_invincible_collision = Item.InvincbleItemCollision(player, invincible_group)
-    player_group.add(item_invincible_collision)
-
-
-    clock = pygame.time.Clock()
-    start_time = pygame.time.get_ticks()  # 경과 시간 표시하기 위해 가져옴.
-    level_up_time = 7000
-
-    running = True
-    while running:
-        # # 배경 이미지
-        # screen.blit(bg_img, (0, 0))
-        #
-        # # 가운데 원 그리기
-        # pygame.draw.circle(screen, consts.const["circle_color"], consts.const["center"], consts.const["radius"],
-        #                    consts.const["circle_width"])
-        # pygame.draw.circle(screen, (0, 0, 0), consts.const["center"],
-        #                    consts.const["radius"] - consts.const["circle_width"])
-        font = pygame.font.SysFont(None, 30)
-        baseUI = UI.PygameUI(screen, bg_img, font)
-
-        UI.PygameUI.draw_background(baseUI)
-        UI.PygameUI.draw_circle(baseUI)
-
-        # FPS
-        clock.tick(60)
-
-        # 이벤트 처리
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-        # 화살 랜덤 생성 (확률을 randint로 조정)
-
-        arrow_select = random.randint(1, variables.probability[0])
-        if len(arrows.sprites()) < variables.level[0] * 10:
-            if arrow_select == 1:
-                new_arrow = arrow.TopArrow()
-                arrows.add(new_arrow)
-                all_sprites.add(new_arrow)
-            elif arrow_select == 2:
-                new_arrow = arrow.LeftArrow()
-                arrows.add(new_arrow)
-                all_sprites.add(new_arrow)
-            elif arrow_select == 3:
-                new_arrow = arrow.RightArrow()
-                arrows.add(new_arrow)
-                all_sprites.add(new_arrow)
-            elif arrow_select == 4:
-                new_arrow = arrow.BottomArrow()
-                arrows.add(new_arrow)
-                all_sprites.add(new_arrow)
-
-        # # 현재 점수 표시
-        # font = pygame.font.SysFont(None, 30)
-        # score_text = font.render("Score: " + str(variables.current_score[0]), True, (255, 255, 255))
-        # screen.blit(score_text, (10, 10))
-        UI.PygameUI.show_score(baseUI)
-
-        # 현재 경과 시간 표시
-        # temp = pygame.time.get_ticks()
-        # variables.elapsed_time[0] = (temp - start_time) // 1000  # 밀리초를 초 단위로 변환
-        # minutes = variables.elapsed_time[0] // 60  # 분 계산
-        # seconds = variables.elapsed_time[0] % 60  # 초 계산
-        # text = font.render("{:02d}:{:02d}".format(minutes, seconds), True, (255, 255, 255))
-        # screen.blit(text, (10, 40))
-        temp = pygame.time.get_ticks()
-        seconds = UI.PygameUI.show_time(baseUI, start_time, temp)
-
-        # 현재 레벨 표시
-        # level_text = font.render(f"Level: {variables.level[0]}", True, (255, 255, 255))
-        # screen.blit(level_text, (10, 70))
-        UI.PygameUI.show_level(baseUI)
-
-        if seconds > 0 and (temp - start_time) >= level_up_time:
-            variables.level[0] += 1
-            #난이도 올라갈떄마다 아이템 추가하도록 업데이트
-
-            tempnum = random.randint(0, 10)
-            if tempnum % 10 == 4 or 5:
-                #즉사아이템 확률조정
-                instantkill_item = Item.InstantkillItem(player, instantkill_group)
-                all_sprites.add(instantkill_item)
-                items.add(instantkill_item)
-                instantkill_group.add(instantkill_item)
-
-            else:
-                invincible_item = Item.InvincibleItem()
-                all_sprites.add(invincible_item)
-                items.add(invincible_item)
-                invincible_group.add(invincible_item)
-
-            if variables.probability[0] > 15:
-                variables.probability[0] -= 7
-            level_up_time += 7000
-
-        if player.invincible:
-            invincible_text = font.render("INVINCIBLE!!", True, (255, 255, 255))
-            screen.blit(invincible_text, (10, 100))
-
-        # 충돌시 중지
-        if pygame.sprite.spritecollide(player, arrows, True):
-            if player.invincible:
-                variables.current_score[0] += 1
-            else:
-                running = False
-        if pygame.sprite.spritecollide(player, instantkill_group, True):
-            running = False
-
-        # 게임 로직 업데이트
-        all_sprites.update()
-        # 게임 화면 그리기
-        all_sprites.draw(screen)
-        pygame.display.update()
-
+def save_score():
     # 충돌 후, 최고 점수 및 최고 시간 전역 변수에 기록
     if variables.current_score[0] > variables.top_score[0]:
         variables.top_score[0] = variables.current_score[0]
@@ -205,9 +21,113 @@ def game_start():
     if variables.level[0] > variables.max_level[0]:
         variables.max_level[0] = variables.level[0]
 
-    variables.probability[0] = 60
 
-    all_sprites.empty()
-    items.empty()
-    arrows.empty()
+def reset_var():
+    variables.show_level.set(f"최고 레벨: {variables.max_level[0]}")
+    variables.show_score.set(f"최고 점수: {str(variables.top_score[0])}")
+    variables.show_time.set("최고 시간: {:02d}:{:02d}".format(variables.max_time[0] // 60, variables.max_time[0] % 60))
+
+    variables.probability[0] = 60
+    variables.level[0] = 1
+    variables.current_score[0] = 0
+    variables.elapsed_time[0] = 0
+
+
+def game_over():
+    """게임 종료 함수"""
+    screen.fill((255, 255, 255))
+    font = pygame.font.SysFont(None, 50)
+    baseUI = UI.EndUI(screen, None, font)
+
+    UI.EndUI.game_over_screen(baseUI)
+    UI.EndUI.show_time(baseUI)
+    UI.EndUI.show_level(baseUI)
+    UI.EndUI.show_score(baseUI)
+
+    pygame.display.update()
+    pygame.time.wait(2000)
+
+    # Quit pygame
+    pygame.quit()
+    reset_var()
+
+
+def game_start():
+    """게임 시작 함수"""
+    pygame.init()
+
+    global screen
+    screen = pygame.display.set_mode(
+        (consts.const["screen_width"], consts.const["screen_height"]))  # pygame screen
+    pygame.display.set_caption("화살 피하기 게임")
+    bg_img = pygame.transform.scale(pygame.image.load("background.jpg"),
+                                    (consts.const["screen_width"], consts.const["screen_height"]))
+    screen.blit(bg_img, (0, 0))
+
+    # add player
+    player = pl.Player()
+    variables.player_group.add(player)
+    variables.all_sprites.add(player)
+
+    # save start time, set levelup time
+    clock = pygame.time.Clock()
+    start_time = pygame.time.get_ticks()  # 경과 시간 표시하기 위해 가져옴.
+    level_up_time = 7000
+
+    # event
+    running = True
+    while running:
+
+        # 이벤트 처리
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        # UI
+        font = pygame.font.SysFont(None, 30)
+        baseUI = UI.MainGameUI(screen, bg_img, font)
+        UI.MainGameUI.draw_background(baseUI)
+        UI.MainGameUI.draw_circle(baseUI)
+        UI.MainGameUI.show_score(baseUI)
+        UI.MainGameUI.show_level(baseUI)
+        current_time = pygame.time.get_ticks()
+        seconds = UI.MainGameUI.show_time(baseUI, start_time, current_time)
+
+        # FPS
+        clock.tick(60)
+
+        # make arrow
+        arrow.make_arrow(player)
+
+        # level up
+        if seconds > 0 and (current_time - start_time) >= level_up_time:
+            variables.level[0] += 1
+
+            tempnum = random.randint(0, 10)  #난이도 올라갈떄마다 아이템 추가하도록 업데이트
+            if tempnum == 4 or 5 or 6 or 7:
+                invincible_item = Item.InvincibleItem(player, variables.invincible_group)
+                Item.add_item(invincible_item, variables.invincible_group)
+            else:
+                instantkill_item = Item.InstantkillItem(player, variables.instantkill_group)
+                Item.add_item(instantkill_item, variables.instantkill_group)
+
+            if variables.probability[0] > 15:
+                variables.probability[0] -= 4
+            level_up_time += 7000
+
+        if player.invincible:
+            invincible_text = font.render("INVINCIBLE!!", True, (255, 255, 255))
+            screen.blit(invincible_text, (10, 100))
+
+        # 플레이어가 죽으면 중지
+        if len(variables.player_group.sprites()) == 0:
+            running = False
+
+        # 게임 로직 및 게임 화면 update & draw
+        variables.all_sprites.update()
+        variables.all_sprites.draw(screen)
+        pygame.display.update()
+
+    save_score()
+    variables.all_sprites.empty()
     game_over()

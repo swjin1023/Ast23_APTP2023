@@ -6,7 +6,7 @@ import variables
 class Arrow(pygame.sprite.Sprite):
     """화살 객체 Parent"""
 
-    def __init__(self):
+    def __init__(self, player):
         super().__init__()
         self.image = pygame.transform.flip(pygame.transform.scale(pygame.image.load("arrow.png"), (10, 30)), False,
                                            True)  # 이미지 가져오기
@@ -25,12 +25,20 @@ class Arrow(pygame.sprite.Sprite):
         self.dx = self.speed
         self.dy = self.speed
 
+        self.player = player
+
+    def update(self):
+        if pygame.sprite.spritecollide(self.player, variables.arrows, True):
+            if self.player.invincible:
+                variables.current_score[0] += 1
+            else:
+                self.player.kill()
 
 class TopArrow(Arrow):
     """화살 객체 (위->아래)"""
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, player):
+        super().__init__(player)
         self.rect.x = random.randint(self.center[0] - self.radius,
                                      self.center[0] + self.radius - self.width)  # 화살 x좌표 변경
         self.rect.y = 0  # 화살 y좌표 변경
@@ -42,14 +50,16 @@ class TopArrow(Arrow):
             if self.rect.y > self.screen_height:  # 화면 밖으로 나갔는지 확인
                 self.kill()  # 객체 삭제
                 variables.current_score[0] += 1
+        super().update()
+
         # 왼쪽 위가 (0,0)이다!
 
 
 class LeftArrow(Arrow):
     """화살 객체 (왼쪽->오른쪽)"""
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, player):
+        super().__init__(player)
         self.image = pygame.transform.rotate(self.image, 90)  # 이미지 회전
         self.rect.x = 0  # 화살 x좌표 변경
         self.rect.y = random.randint(self.center[1] - self.radius,
@@ -61,13 +71,14 @@ class LeftArrow(Arrow):
             if self.rect.x > self.screen_width:
                 self.kill()
                 variables.current_score[0] += 1
+        super().update()
 
 
 class RightArrow(Arrow):
     """화살 객체 (오른쪽->왼쪽)"""
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, player):
+        super().__init__(player)
         self.image = pygame.transform.rotate(self.image, -90)
         self.rect.x = self.screen_width - self.width  # 화살 x좌표 변경
         self.rect.y = random.randint(self.center[1] - self.radius,
@@ -79,12 +90,13 @@ class RightArrow(Arrow):
             if self.rect.x < 0:
                 self.kill()
                 variables.current_score[0] += 1
+        super().update()
 
 
 class BottomArrow(Arrow):
     """화살 객체 (아래->위)"""
-    def __init__(self):
-        super().__init__()
+    def __init__(self, player):
+        super().__init__(player)
         self.image = pygame.transform.flip(self.image, False, True)
         self.rect.x = random.randint(self.center[0] - self.radius,
                                      self.center[0] + self.radius - self.width)  # 화살 x좌표 변경
@@ -98,6 +110,20 @@ class BottomArrow(Arrow):
             if self.rect.y < 0:
                 self.kill()
                 variables.current_score[0] += 1
+        super().update()
 
-
-
+def make_arrow(player):
+    arrow_select = random.randint(1, variables.probability[0])
+    if len(variables.arrows.sprites()) < variables.level[0] * 10:
+        if arrow_select == 1:
+            new_arrow = TopArrow(player)
+        elif arrow_select == 2:
+            new_arrow = LeftArrow(player)
+        elif arrow_select == 3:
+            new_arrow = RightArrow(player)
+        elif arrow_select == 4:
+            new_arrow = BottomArrow(player)
+        else:
+            return
+        variables.arrows.add(new_arrow)
+        variables.all_sprites.add(new_arrow)

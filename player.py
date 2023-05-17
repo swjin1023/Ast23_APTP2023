@@ -47,3 +47,5 @@ class Player(pygame.sprite.Sprite):
         if status >= self.radius ** 2:
             self.rect.x = x_before
             self.rect.y = y_before
+
+
