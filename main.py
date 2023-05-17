@@ -1,9 +1,6 @@
-import sys
-
 import UI
 import variables
 
 if __name__ == "__main__":
-    main_page = UI.UI(variables.root)
+    main_page = UI.StartUI(variables.root)
     variables.root.mainloop()
-    #test

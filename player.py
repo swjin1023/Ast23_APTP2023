@@ -12,9 +12,9 @@ class Player(pygame.sprite.Sprite):
         self.width = self.image.get_width()
         self.height = self.image.get_height()
 
-        self.center = consts.data_constant["center"]
-        self.player_speed = consts.data_constant["player_speed"]
-        self.radius = consts.data_constant["radius"]
+        self.center = consts.const["center"]
+        self.player_speed = consts.const["player_speed"]
+        self.radius = consts.const["radius"]
 
         # 초기 위치: 중앙
         self.rect.x = self.center[0]
@@ -47,3 +47,5 @@ class Player(pygame.sprite.Sprite):
         if status >= self.radius ** 2:
             self.rect.x = x_before
             self.rect.y = y_before
+
+

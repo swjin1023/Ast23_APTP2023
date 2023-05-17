@@ -1,5 +1,5 @@
 import tkinter as tk
-
+import pygame
 root = tk.Tk()  # tkinter root
 
 # 전역 변수
@@ -16,3 +16,14 @@ max_level = [1]
 show_level = tk.StringVar()
 
 probability = [60]
+
+all_sprites = pygame.sprite.Group()
+arrows = pygame.sprite.Group()
+items = pygame.sprite.Group()
+player_group = pygame.sprite.Group()
+invincible_group = pygame.sprite.Group()
+instantkill_group = pygame.sprite.Group()
+
+sprite_group = [arrows, items, player_group, invincible_group, instantkill_group]
+for item in sprite_group:
+    all_sprites.add(item)
