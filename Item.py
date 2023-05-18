@@ -66,8 +66,4 @@ class InstantkillItem(Item):
             self.player_sprite.kill()
 
 
-def add_item(sprite, sprite_group):
-    new_item = sprite
-    variables.all_sprites.add(new_item)
-    variables.items.add(new_item)
-    sprite_group.add(new_item)
+

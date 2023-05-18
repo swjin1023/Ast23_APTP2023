@@ -13,6 +13,7 @@ class StartUI(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
         self.dodge_game = Game.DodgeGame()
+
         master.geometry("350x350")
         master.title("화살 피하기")
         self.master = master

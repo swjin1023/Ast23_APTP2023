@@ -53,6 +53,12 @@ class Game:
     def make_arrow(self, player):
         pass
 
+    def add_item(self, sprite, sprite_group):
+        new_item = sprite
+        variables.all_sprites.add(new_item)
+        variables.items.add(new_item)
+        sprite_group.add(new_item)
+
 
 class DodgeGame(Game):
 
@@ -138,10 +144,10 @@ class DodgeGame(Game):
                 tempnum = random.randint(0, 10)  # 난이도 올라갈떄마다 아이템 추가하도록 업데이트
                 if tempnum == 4 or 5 or 6 or 7:
                     invincible_item = Item.InvincibleItem(self.player, variables.invincible_group)
-                    Item.add_item(invincible_item, variables.invincible_group)
+                    self.add_item(invincible_item, variables.invincible_group)
                 else:
                     instantkill_item = Item.InstantkillItem(self.player, variables.instantkill_group)
-                    Item.add_item(instantkill_item, variables.instantkill_group)
+                    self.add_item(instantkill_item, variables.instantkill_group)
 
                 if variables.probability[0] > 15:
                     variables.probability[0] -= 3
