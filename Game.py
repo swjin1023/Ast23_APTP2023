@@ -33,7 +33,6 @@ def reset_var():
 
 class Game:
     def __init__(self):
-        pygame.init()
         self.screen = None
         self.bg_img = pygame.transform.scale(pygame.image.load("background.jpg"),
                                              (consts.const["screen_width"], consts.const["screen_height"]))
@@ -42,7 +41,7 @@ class Game:
         pass
 
     def game_start(self):
-        pass
+        pygame.init()
 
     def add_player(self):
         player = pl.Player()
@@ -64,7 +63,7 @@ class DodgeGame(Game):
 
     def __init__(self):
         super().__init__()
-        self.player = self.add_player()
+        self.player = None
 
     def make_arrow(self, player):
         arrow_select = random.randint(1, variables.probability[0])
@@ -102,6 +101,8 @@ class DodgeGame(Game):
 
     def game_start(self):
         """게임 시작 함수"""
+        super().game_start()
+        self.player = self.add_player()
         self.screen = pygame.display.set_mode(
             (consts.const["screen_width"], consts.const["screen_height"]))  # pygame screen
         pygame.display.set_caption("화살 피하기 게임")
@@ -168,4 +169,5 @@ class DodgeGame(Game):
 
         save_score()
         variables.all_sprites.empty()
+        variables.arrows.empty()
         self.game_over()
