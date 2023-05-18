@@ -112,18 +112,4 @@ class BottomArrow(Arrow):
                 variables.current_score[0] += 1
         super().update()
 
-def make_arrow(player):
-    arrow_select = random.randint(1, variables.probability[0])
-    if len(variables.arrows.sprites()) < variables.level[0] * 10:
-        if arrow_select == 1:
-            new_arrow = TopArrow(player)
-        elif arrow_select == 2:
-            new_arrow = LeftArrow(player)
-        elif arrow_select == 3:
-            new_arrow = RightArrow(player)
-        elif arrow_select == 4:
-            new_arrow = BottomArrow(player)
-        else:
-            return
-        variables.arrows.add(new_arrow)
-        variables.all_sprites.add(new_arrow)
+
