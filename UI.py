@@ -98,7 +98,7 @@ class EndUI(PygameUI):
         score_text = self.font.render(f"Score: {var.current_score[0]}", True, (0, 0, 0))
         score_text_rect = score_text.get_rect()
         score_text_rect.center = (consts.const["screen_width"] / 2 - 8,
-                                  consts.const["screen_height"] / 2 + 10)
+                                         consts.const["screen_height"] / 2 + 10)
         self.screen.blit(score_text, score_text_rect)
 
     def show_time(self):
@@ -108,7 +108,7 @@ class EndUI(PygameUI):
                                      True, (0, 0, 0))
         time_text_rect = time_text.get_rect()
         time_text_rect.center = (consts.const["screen_width"] / 2 - 13,
-                                 consts.const["screen_height"] / 2 + 50)
+                                        consts.const["screen_height"] / 2 + 50)
         self.screen.blit(time_text, time_text_rect)
 
     def show_level(self):
@@ -116,7 +116,7 @@ class EndUI(PygameUI):
         level_text = self.font.render(f"Level: {var.level[0]}", True, (0, 0, 0))
         level_text_rect = level_text.get_rect()
         level_text_rect.center = (consts.const["screen_width"] / 2 - 26,
-                                  consts.const["screen_height"] / 2 + 90)
+                                         consts.const["screen_height"] / 2 + 90)
         self.screen.blit(level_text, level_text_rect)
 
 

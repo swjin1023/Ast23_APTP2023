@@ -5,6 +5,7 @@ import pygame
 import random
 import time
 
+
 class Item(pygame.sprite.Sprite):
     def __init__(self, player):
         super().__init__()
@@ -21,8 +22,7 @@ class Item(pygame.sprite.Sprite):
                                         500 + (consts.const["radius"] - self.rect.width))
             self.tempy = random.randint(400 - (400 + consts.const["radius"] - self.rect.height),
                                         (400 + consts.const["radius"] - self.rect.height))
-        self.rect.x = self.tempx
-        self.rect.y = self.tempy
+        self.rect.center = self.tempx, self.tempy
 
         self.player = player
 
