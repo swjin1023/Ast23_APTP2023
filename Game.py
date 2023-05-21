@@ -6,29 +6,29 @@ import player as pl
 import Item
 import arrow
 
-import variables
+import var
 import consts
 
 
 def save_score():
     # 충돌 후, 최고 점수 및 최고 시간 전역 변수에 기록
-    if variables.current_score[0] > variables.top_score[0]:
-        variables.top_score[0] = variables.current_score[0]
-    if variables.elapsed_time[0] > variables.max_time[0]:
-        variables.max_time[0] = variables.elapsed_time[0]
-    if variables.level[0] > variables.max_level[0]:
-        variables.max_level[0] = variables.level[0]
+    if var.current_score[0] > var.top_score[0]:
+        var.top_score[0] = var.current_score[0]
+    if var.elapsed_time[0] > var.max_time[0]:
+        var.max_time[0] = var.elapsed_time[0]
+    if var.level[0] > var.max_level[0]:
+        var.max_level[0] = var.level[0]
 
 
 def reset_var():
-    variables.show_level.set(f"최고 레벨: {variables.max_level[0]}")
-    variables.show_score.set(f"최고 점수: {str(variables.top_score[0])}")
-    variables.show_time.set("최고 시간: {:02d}:{:02d}".format(variables.max_time[0] // 60, variables.max_time[0] % 60))
+    var.show_level.set(f"최고 레벨: {var.max_level[0]}")
+    var.show_score.set(f"최고 점수: {str(var.top_score[0])}")
+    var.show_time.set("최고 시간: {:02d}:{:02d}".format(var.max_time[0] // 60, var.max_time[0] % 60))
 
-    variables.probability[0] = 60
-    variables.level[0] = 1
-    variables.current_score[0] = 0
-    variables.elapsed_time[0] = 0
+    var.probability[0] = 60
+    var.level[0] = 1
+    var.current_score[0] = 0
+    var.elapsed_time[0] = 0
 
 
 class Game:
@@ -45,8 +45,8 @@ class Game:
 
     def add_player(self):
         player = pl.Player()
-        variables.player_group.add(player)
-        variables.all_sprites.add(player)
+        var.player_group.add(player)
+        var.all_sprites.add(player)
         return player
 
     def make_arrow(self, player):
@@ -54,8 +54,8 @@ class Game:
 
     def add_item(self, sprite, sprite_group):
         new_item = sprite
-        variables.all_sprites.add(new_item)
-        variables.items.add(new_item)
+        var.all_sprites.add(new_item)
+        var.items.add(new_item)
         sprite_group.add(new_item)
 
 
@@ -66,8 +66,8 @@ class DodgeGame(Game):
         self.player = None
 
     def make_arrow(self, player):
-        arrow_select = random.randint(1, variables.probability[0])
-        if len(variables.arrows.sprites()) < variables.level[0] * 10:
+        arrow_select = random.randint(1, var.probability[0])
+        if len(var.arrows.sprites()) < var.level[0] * 10:
             if arrow_select == 1:
                 new_arrow = arrow.TopArrow(player)
             elif arrow_select == 2:
@@ -78,8 +78,8 @@ class DodgeGame(Game):
                 new_arrow = arrow.BottomArrow(player)
             else:
                 return
-            variables.arrows.add(new_arrow)
-            variables.all_sprites.add(new_arrow)
+            var.arrows.add(new_arrow)
+            var.all_sprites.add(new_arrow)
 
     def game_over(self):
         """게임 종료 함수"""
@@ -116,6 +116,9 @@ class DodgeGame(Game):
         # event
         running = True
         while running:
+            var.all_sprites.update()
+            var.all_sprites.draw(self.screen)
+            pygame.display.update()
 
             # 이벤트 처리
             for event in pygame.event.get():
@@ -140,18 +143,18 @@ class DodgeGame(Game):
 
             # level up
             if seconds > 0 and (current_time - start_time) >= level_up_time:
-                variables.level[0] += 1
+                var.level[0] += 1
 
                 tempnum = random.randint(0, 10)  # 난이도 올라갈떄마다 아이템 추가하도록 업데이트
                 if tempnum == 4 or 5 or 6 or 7:
-                    invincible_item = Item.InvincibleItem(self.player, variables.invincible_group)
-                    self.add_item(invincible_item, variables.invincible_group)
+                    invincible_item = Item.InvincibleItem(self.player)
+                    self.add_item(invincible_item, var.invincible_group)
                 else:
-                    instantkill_item = Item.InstantkillItem(self.player, variables.instantkill_group)
-                    self.add_item(instantkill_item, variables.instantkill_group)
+                    instantkill_item = Item.InstantkillItem(self.player)
+                    self.add_item(instantkill_item, var.instantkill_group)
 
-                if variables.probability[0] > 15:
-                    variables.probability[0] -= 3
+                if var.probability[0] > 15:
+                    var.probability[0] -= 3
                 level_up_time += 7000
 
             if self.player.invincible:
@@ -159,15 +162,13 @@ class DodgeGame(Game):
                 self.screen.blit(invincible_text, (10, 100))
 
             # 플레이어가 죽으면 중지
-            if len(variables.player_group.sprites()) == 0:
+            if len(var.player_group.sprites()) == 0:
                 running = False
 
             # 게임 로직 및 게임 화면 update & draw
-            variables.all_sprites.update()
-            variables.all_sprites.draw(self.screen)
-            pygame.display.update()
+
 
         save_score()
-        variables.all_sprites.empty()
-        variables.arrows.empty()
+        var.all_sprites.empty()
+        var.arrows.empty()
         self.game_over()

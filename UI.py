@@ -2,7 +2,7 @@ import enum
 import tkinter as tk
 import sys
 import Game
-import variables
+import var
 import pygame
 import consts
 
@@ -28,16 +28,16 @@ class StartUI(tk.Frame):
                                 command=self.terminate)
         exit_button.pack(side="right")
 
-        variables.show_level.set(f"최고 레벨: {variables.max_level[0]}")
-        level_label = tk.Label(master, textvariable=variables.show_level, font=("Helvetica", 14))
+        var.show_level.set(f"최고 레벨: {var.max_level[0]}")
+        level_label = tk.Label(master, textvariable=var.show_level, font=("Helvetica", 14))
         level_label.pack(side="bottom")
 
-        variables.show_time.set("최고 시간: {:02d}:{:02d}".format(variables.max_time[0] // 60, variables.max_time[0] % 60))
-        time_label = tk.Label(master, textvariable=variables.show_time, font=("Helvetica", 14))
+        var.show_time.set("최고 시간: {:02d}:{:02d}".format(var.max_time[0] // 60, var.max_time[0] % 60))
+        time_label = tk.Label(master, textvariable=var.show_time, font=("Helvetica", 14))
         time_label.pack(side="bottom")
 
-        variables.show_score.set(f"최고 점수: {variables.top_score[0]}")
-        score_label = tk.Label(master, textvariable=variables.show_score, font=("Helvetica", 14))
+        var.show_score.set(f"최고 점수: {var.top_score[0]}")
+        score_label = tk.Label(master, textvariable=var.show_score, font=("Helvetica", 14))
         score_label.pack(side="bottom")
 
     def terminate(self):
@@ -65,15 +65,15 @@ class MainGameUI(PygameUI):
                            consts.const["radius"] - consts.const["circle_width"])
 
     def show_score(self):
-        score_text = self.font.render("Score: " + str(variables.current_score[0]), True, (255, 255, 255))
+        score_text = self.font.render("Score: " + str(var.current_score[0]), True, (255, 255, 255))
         self.screen.blit(score_text, (10, 10))
 
     def show_time(self, start_time, current_time):
         # 현재 경과 시간 표시
 
-        variables.elapsed_time[0] = (current_time - start_time) // 1000  # 밀리초를 초 단위로 변환
-        minutes = variables.elapsed_time[0] // 60  # 분 계산
-        seconds = variables.elapsed_time[0] % 60  # 초 계산
+        var.elapsed_time[0] = (current_time - start_time) // 1000  # 밀리초를 초 단위로 변환
+        minutes = var.elapsed_time[0] // 60  # 분 계산
+        seconds = var.elapsed_time[0] % 60  # 초 계산
         text = self.font.render("{:02d}:{:02d}".format(minutes, seconds), True, (255, 255, 255))
         self.screen.blit(text, (10, 40))
 
@@ -81,7 +81,7 @@ class MainGameUI(PygameUI):
 
     def show_level(self):
         # 현재 레벨 표시
-        level_text = self.font.render(f"Level: {variables.level[0]}", True, (255, 255, 255))
+        level_text = self.font.render(f"Level: {var.level[0]}", True, (255, 255, 255))
         self.screen.blit(level_text, (10, 70))
 
 
@@ -95,7 +95,7 @@ class EndUI(PygameUI):
 
     def show_score(self):
         # 이번 게임 score
-        score_text = self.font.render(f"Score: {variables.current_score[0]}", True, (0, 0, 0))
+        score_text = self.font.render(f"Score: {var.current_score[0]}", True, (0, 0, 0))
         score_text_rect = score_text.get_rect()
         score_text_rect.center = (consts.const["screen_width"] / 2 - 8,
                                   consts.const["screen_height"] / 2 + 10)
@@ -103,8 +103,8 @@ class EndUI(PygameUI):
 
     def show_time(self):
         # 이번 게임 경과 시간
-        time_text = self.font.render("time: {:02d}:{:02d}".format(variables.elapsed_time[0] // 60,
-                                                                  variables.elapsed_time[0] % 60),
+        time_text = self.font.render("time: {:02d}:{:02d}".format(var.elapsed_time[0] // 60,
+                                                                  var.elapsed_time[0] % 60),
                                      True, (0, 0, 0))
         time_text_rect = time_text.get_rect()
         time_text_rect.center = (consts.const["screen_width"] / 2 - 13,
@@ -113,7 +113,7 @@ class EndUI(PygameUI):
 
     def show_level(self):
         # 이번 게임 최대 레벨
-        level_text = self.font.render(f"Level: {variables.level[0]}", True, (0, 0, 0))
+        level_text = self.font.render(f"Level: {var.level[0]}", True, (0, 0, 0))
         level_text_rect = level_text.get_rect()
         level_text_rect.center = (consts.const["screen_width"] / 2 - 26,
                                   consts.const["screen_height"] / 2 + 90)

@@ -1,7 +1,7 @@
 import pygame
 import random
 import consts
-import variables
+import var
 
 class Arrow(pygame.sprite.Sprite):
     """화살 객체 Parent"""
@@ -19,7 +19,7 @@ class Arrow(pygame.sprite.Sprite):
         self.radius = consts.const["radius"]
         self.center = consts.const["center"]
         self.speed = consts.const["arrow_speed"]  # 화살 이동 속도
-        self.level = variables.level[0]
+        self.level = var.level[0]
 
         # 화살 delta값
         self.dx = self.speed
@@ -28,9 +28,9 @@ class Arrow(pygame.sprite.Sprite):
         self.player = player
 
     def update(self):
-        if pygame.sprite.spritecollide(self.player, variables.arrows, True):
+        if pygame.sprite.spritecollide(self.player, var.arrows, True):
             if self.player.invincible:
-                variables.current_score[0] += 1
+                var.current_score[0] += 1
             else:
                 self.player.kill()
 
@@ -49,7 +49,7 @@ class TopArrow(Arrow):
             self.rect.y += self.dy  # 기본값은 위에서 아래로 내려오는 것.
             if self.rect.y > self.screen_height:  # 화면 밖으로 나갔는지 확인
                 self.kill()  # 객체 삭제
-                variables.current_score[0] += 1
+                var.current_score[0] += 1
         super().update()
 
         # 왼쪽 위가 (0,0)이다!
@@ -70,7 +70,7 @@ class LeftArrow(Arrow):
             self.rect.x += self.dx
             if self.rect.x > self.screen_width:
                 self.kill()
-                variables.current_score[0] += 1
+                var.current_score[0] += 1
         super().update()
 
 
@@ -89,7 +89,7 @@ class RightArrow(Arrow):
             self.rect.x -= self.dx
             if self.rect.x < 0:
                 self.kill()
-                variables.current_score[0] += 1
+                var.current_score[0] += 1
         super().update()
 
 
@@ -109,7 +109,7 @@ class BottomArrow(Arrow):
             # 화면 밖으로 나갔는지 확인
             if self.rect.y < 0:
                 self.kill()
-                variables.current_score[0] += 1
+                var.current_score[0] += 1
         super().update()
 
 
