@@ -2,7 +2,7 @@ import pygame
 import random
 import consts
 import var
-
+from player import check_collision
 
 class Arrow(pygame.sprite.Sprite):
     """화살 객체 Parent"""
@@ -30,7 +30,7 @@ class Arrow(pygame.sprite.Sprite):
         self.player = player
 
     def update(self):
-        if pygame.sprite.spritecollide(self.player, var.arrows, True):
+        if pygame.sprite.spritecollide(self.player, var.arrows, True, collided=check_collision):
             if self.player.invincible:
                 var.current_score[0] += 1
             else:
@@ -66,7 +66,7 @@ class LeftArrow(Arrow):
         self.image = pygame.transform.rotate(self.image, 90)  # 이미지 회전
         self.rect.centerx = 0  # 화살 x좌표 변경
         self.rect.centery = random.randint(self.screen_center[1] - self.screen_radius,
-                                     self.screen_center[1] + self.screen_radius - self.height)  # 화살 y좌표 변경
+                                           self.screen_center[1] + self.screen_radius - self.height)  # 화살 y좌표 변경
 
     def update(self):
         for i in range(0, self.level):
@@ -85,7 +85,7 @@ class RightArrow(Arrow):
         self.image = pygame.transform.rotate(self.image, -90)
         self.rect.centerx = self.screen_width - self.width  # 화살 x좌표 변경
         self.rect.centery = random.randint(self.screen_center[1] - self.screen_radius,
-                                     self.screen_center[1] + self.screen_radius - self.height)  # 화살 y좌표 변경
+                                           self.screen_center[1] + self.screen_radius - self.height)  # 화살 y좌표 변경
 
     def update(self):
         for i in range(0, self.level):
@@ -103,7 +103,7 @@ class BottomArrow(Arrow):
         super().__init__(player)
         self.image = pygame.transform.flip(self.image, False, True)
         self.rect.centerx = random.randint(self.screen_center[0] - self.screen_radius,
-                                     self.screen_center[0] + self.screen_radius - self.width)  # 화살 x좌표 변경
+                                           self.screen_center[0] + self.screen_radius - self.width)  # 화살 x좌표 변경
         self.rect.centery = self.screen_height - self.height  # 화살 y좌표 변경
 
     def update(self):

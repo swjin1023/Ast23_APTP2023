@@ -5,11 +5,14 @@ import pygame
 import random
 import time
 
+from player import check_collision
+
 
 class Item(pygame.sprite.Sprite):
     def __init__(self, player):
         super().__init__()
         self.image = pygame.transform.scale(pygame.image.load("star.png"), (30, 30))  # 기본값: 별 (무적 아이템)
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.width = self.image.get_width()
         self.height = self.image.get_height()
@@ -34,7 +37,7 @@ class InvincibleItem(Item):
         super().__init__(player)
 
     def update(self):
-        if pygame.sprite.spritecollide(self, var.player_group, False):
+        if pygame.sprite.spritecollide(self, var.player_group, False, collided=check_collision):
             if not self.player.invincible:
                 self.player.invincible = True
                 self.player.invincible_end_time = time.time() + 3
@@ -50,7 +53,7 @@ class InstantkillItem(Item):
 
     def update(self):
         # 충돌 검사
-        if pygame.sprite.spritecollide(self, var.player_group, False):
+        if pygame.sprite.spritecollide(self, var.player_group, False, collided=check_collision):
             self.player.kill()
 
 

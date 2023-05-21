@@ -1,7 +1,22 @@
 import pygame
 import consts
-import var
 import time
+
+
+def check_collision(player, other_sprite):
+    # 원형 히트박스를 고려한 충돌 감지 로직
+    # if isinstance(other_sprite, Player):
+    #     # 플레이어와 플레이어 사이의 충돌을 처리할 경우
+    #     distance = player.rect.center - other_sprite.rect.center
+    #     return distance.length() <= player.radius + other_sprite.radius
+    # else:
+    # 플레이어와 다른 스프라이트 사이의 충돌을 처리할 경우
+    # offset_x = other_sprite.rect.x - player.rect.centerx
+    # offset_y = other_sprite.rect.y - player.rect.centery
+    # overlap = player.mask.overlap(other_sprite.mask, (offset_x, offset_y))
+    # return overlap is not None
+    return pygame.sprite.collide_mask(player, other_sprite)
+
 
 class Player(pygame.sprite.Sprite):
     """player 객체"""
@@ -12,8 +27,6 @@ class Player(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.radius = self.image.get_width() // 2
         self.rect = self.image.get_rect()
-        # self.width = self.image.get_width()
-        # self.height = self.image.get_height()
 
         self.rect.center = self.center = consts.const["center"]
         self.player_speed = consts.const["player_speed"]
@@ -47,10 +60,10 @@ class Player(pygame.sprite.Sprite):
         status = (self.rect.centerx - self.center[0]) ** 2 + (self.rect.centery - self.center[1]) ** 2
         if status >= self.radius ** 2:
             self.rect.center = before
-            # self.rect.x = x_before
-            # self.rect.y = y_before
 
         # invincible 속성 update 기준
         if self.invincible and time.time() >= self.invincible_end_time:
             time.sleep(1)
             self.invincible = False
+
+

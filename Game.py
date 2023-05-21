@@ -162,7 +162,7 @@ class DodgeGame(Game):
             # 게임 로직 및 게임 화면 update & draw
             var.all_sprites.update()
             var.all_sprites.draw(self.screen)
-            pygame.display.update()
+            pygame.display.flip()
 
         self.save_score()
         var.all_sprites.empty()
