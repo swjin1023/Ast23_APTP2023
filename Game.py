@@ -157,14 +157,14 @@ class DodgeGame(Game):
                 level_up_time += 7000
 
             if self.player.invincible and self.player.invincible_end_time - time.time() > 0:
-                invincible_text = font.render(f"INVINCIBLE!!: {self.player.invincible_end_time - time.time():1f}sec",
+                invincible_text = font.render(f"INVINCIBLE!!: {self.player.invincible_end_time - time.time():.3f}sec",
                                               True, consts.color["white"])
                 self.screen.blit(invincible_text, (10, 100))
 
             if var.arrows:
                 if (var.arrows.sprites())[0].freeze and (var.arrows.sprites())[0].freeze_end_time - time.time() > 0:
                     freeze_text = font.render(
-                        f"FREEZE!!: {var.arrows.sprites()[0].freeze_end_time - time.time():1f}sec", True,
+                        f"FREEZE!!: {var.arrows.sprites()[0].freeze_end_time - time.time():.3f}sec", True,
                         consts.color["white"])
                     self.screen.blit(freeze_text, (10, 130))
 
