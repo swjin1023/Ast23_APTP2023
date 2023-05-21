@@ -49,11 +49,28 @@ class InvincibleItem(Item):
 class InstantkillItem(Item):
     """"즉사 아이템"""
     def __init__(self, player):
+        # self.image = pygame.transform.scale(pygame.image.load("questionbox.png"), (30, 30))
         super().__init__(player)
+        self.added_time = time.time()
 
     def update(self):
         # 충돌 검사
         if pygame.sprite.spritecollide(self, var.player_group, False, collided=check_collision):
             self.player.kill()
+        if time.time() - self.added_time > 3:
+            self.kill()
 
+class FreezeItem(Item):
+    def __init__(self, player):
+        super().__init__(player)
+
+    def update(self):
+        if pygame.sprite.spritecollide(self, var.player_group, False, collided=check_collision):
+            for item in var.arrows:
+                if not item.freeze:
+                    item.freeze = True
+                    item.freeze_end_time = time.time() + 3
+                else:
+                    item.freeze_end_time += 3
+            self.kill()
 

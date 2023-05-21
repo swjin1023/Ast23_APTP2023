@@ -24,13 +24,17 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = pygame.transform.scale(pygame.image.load("target.png").convert_alpha(), (20, 20))
-        self.mask = pygame.mask.from_surface(self.image)
-        self.radius = self.image.get_width() // 2
-        self.rect = self.image.get_rect()
-
+        self.surface = pygame.Surface((20, 20), pygame.SRCALPHA)
+        self.rect = self.surface.get_rect()
         self.rect.center = self.center = consts.const["center"]
+        self.radius = self.image.get_width() // 2
+
+        pygame.draw.circle(self.surface, consts.color["black"], self.center, self.radius)
+        self.surface.blit(self.image, (0, 0))
+        self.mask = pygame.mask.from_surface(self.surface)
+
         self.player_speed = consts.const["player_speed"]
-        self.radius = consts.const["radius"]
+        self.screen_radius = consts.const["radius"]
 
         # 객체 이동속도
         self.speed = self.player_speed
@@ -45,25 +49,24 @@ class Player(pygame.sprite.Sprite):
         before = self.rect.center
         # x_before, y_before = self.rect.centerx, self.rect.centery
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT] and status < self.radius ** 2:
+        if keys[pygame.K_LEFT] and status < self.screen_radius ** 2:
             self.rect.x -= self.speed
 
-        if keys[pygame.K_RIGHT] and status < self.radius ** 2:
+        if keys[pygame.K_RIGHT] and status < self.screen_radius ** 2:
             self.rect.x += self.speed
 
-        if keys[pygame.K_UP] and status < self.radius ** 2:
+        if keys[pygame.K_UP] and status < self.screen_radius ** 2:
             self.rect.y -= self.speed
 
-        if keys[pygame.K_DOWN] and status < self.radius ** 2:
+        if keys[pygame.K_DOWN] and status < self.screen_radius ** 2:
             self.rect.y += self.speed
 
         status = (self.rect.centerx - self.center[0]) ** 2 + (self.rect.centery - self.center[1]) ** 2
-        if status >= self.radius ** 2:
+        if status >= self.screen_radius ** 2:
             self.rect.center = before
 
         # invincible 속성 update 기준
         if self.invincible and time.time() >= self.invincible_end_time:
-            time.sleep(1)
             self.invincible = False
 
 

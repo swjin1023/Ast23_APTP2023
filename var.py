@@ -23,7 +23,9 @@ items = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 invincible_group = pygame.sprite.Group()
 instantkill_group = pygame.sprite.Group()
-
-sprite_group = [arrows, items, player_group, invincible_group, instantkill_group]
+freeze_group = pygame.sprite.Group()
+sprite_group = [arrows, items, player_group, invincible_group, instantkill_group, freeze_group]
 for item in sprite_group:
     all_sprites.add(item)
+
+arrow_speed = [1]

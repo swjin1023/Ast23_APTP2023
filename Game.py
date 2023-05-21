@@ -1,6 +1,7 @@
 import UI
 import pygame
 import random
+import time
 
 import player as pl
 import Item
@@ -8,6 +9,7 @@ import arrow
 
 import var
 import consts
+
 
 class Game:
     def __init__(self):
@@ -140,20 +142,31 @@ class DodgeGame(Game):
                 var.level[0] += 1
 
                 tempnum = random.randint(0, 10)  # 난이도 올라갈떄마다 아이템 추가하도록 업데이트
-                if tempnum == 4 or 5 or 6 or 7:
+                if tempnum > 100:
                     invincible_item = Item.InvincibleItem(self.player)
                     self.add_item(invincible_item, var.invincible_group)
-                else:
+                elif tempnum > 101:
                     instantkill_item = Item.InstantkillItem(self.player)
                     self.add_item(instantkill_item, var.instantkill_group)
+                else:
+                    freeze_item = Item.FreezeItem(self.player)
+                    self.add_item(freeze_item, var.freeze_group)
 
                 if var.probability[0] > 15:
                     var.probability[0] -= 3
                 level_up_time += 7000
 
-            if self.player.invincible:
-                invincible_text = font.render("INVINCIBLE!!", True, (255, 255, 255))
+            if self.player.invincible and self.player.invincible_end_time - time.time() > 0:
+                invincible_text = font.render(f"INVINCIBLE!!: {self.player.invincible_end_time - time.time():1f}sec",
+                                              True, consts.color["white"])
                 self.screen.blit(invincible_text, (10, 100))
+
+            if var.arrows:
+                if (var.arrows.sprites())[0].freeze and (var.arrows.sprites())[0].freeze_end_time - time.time() > 0:
+                    freeze_text = font.render(
+                        f"FREEZE!!: {var.arrows.sprites()[0].freeze_end_time - time.time():1f}sec", True,
+                        consts.color["white"])
+                    self.screen.blit(freeze_text, (10, 130))
 
             # 플레이어가 죽으면 중지
             if len(var.player_group.sprites()) == 0:
