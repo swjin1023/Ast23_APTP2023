@@ -42,6 +42,9 @@ class Player(pygame.sprite.Sprite):
         # 무적 상태 (기본: False)
         self.invincible = False
         self.invincible_end_time = 0
+        self.alpha_value = [255, 0]
+        self.blink_speed = 500
+        self.current_alpha = 0
 
     def update(self):
         # 목표물 이동
@@ -50,21 +53,27 @@ class Player(pygame.sprite.Sprite):
         # x_before, y_before = self.rect.centerx, self.rect.centery
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and status < self.screen_radius ** 2:
-            self.rect.x -= self.speed
+            self.rect.centerx -= self.speed
 
         if keys[pygame.K_RIGHT] and status < self.screen_radius ** 2:
-            self.rect.x += self.speed
+            self.rect.centerx += self.speed
 
         if keys[pygame.K_UP] and status < self.screen_radius ** 2:
-            self.rect.y -= self.speed
+            self.rect.centery -= self.speed
 
         if keys[pygame.K_DOWN] and status < self.screen_radius ** 2:
-            self.rect.y += self.speed
+            self.rect.centery += self.speed
 
         status = (self.rect.centerx - self.center[0]) ** 2 + (self.rect.centery - self.center[1]) ** 2
         if status >= self.screen_radius ** 2:
             self.rect.center = before
 
+
         # invincible 속성 update 기준
-        if self.invincible and time.time() >= self.invincible_end_time:
-            self.invincible = False
+        if self.invincible:
+            if time.time() >= self.invincible_end_time:
+                self.image.set_alpha(self.alpha_value[0])
+                self.invincible = False
+            else:
+                self.current_alpha += 1
+                self.image.set_alpha(self.alpha_value[self.current_alpha % len(self.alpha_value)])

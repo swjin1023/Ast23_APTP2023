@@ -58,7 +58,7 @@ class InstantkillItem(Item):
         # 충돌 검사
         if pygame.sprite.spritecollide(self, var.player_group, False, collided=check_collision):
             self.player.kill()
-        if time.time() - self.added_time > 3:
+        if time.time() - self.added_time > 2.5:
             self.kill()
 
 class FreezeItem(Item):
@@ -76,3 +76,13 @@ class FreezeItem(Item):
                     item.freeze_end_time += 3
             self.kill()
 
+class ArrowAllKillItem(Item):
+    def __init__(self, player):
+        super().__init__(player)
+
+    def update(self):
+        if pygame.sprite.spritecollide(self, var.player_group, False, collided=check_collision):
+            for item in var.arrows:
+                var.current_score[0] += 1
+                item.kill()
+            self.kill()

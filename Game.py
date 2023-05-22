@@ -125,33 +125,39 @@ class DodgeGame(Game):
             font = pygame.font.SysFont(None, 30)
             baseUI = UI.MainGameUI(self.screen, self.bg_img, font)
             baseUI.draw_background()
-            baseUI.draw_circle()
+            baseUI.draw_circle_boundary()
             baseUI.show_score(10, 10)
             current_time = pygame.time.get_ticks()
             seconds = UI.MainGameUI.show_time(baseUI, start_time, current_time, 10, 40)
             baseUI.show_level(10, 70)
             baseUI.show_level_left_time(10, 100, level_up_time, current_time)
+
             # FPS
             clock.tick(60)
 
             # make arrow
             self.make_arrow(self.player)
+            if var.arrows:
+                if var.arrows.sprites()[0].freeze:
+                    var.arrows.sprites().pop(-1)
+
 
             # level up
             if seconds > 0 and (current_time - start_time) >= level_up_time:
                 var.level[0] += 1
-
-                tempnum = random.randint(0, 10)  # 난이도 올라갈떄마다 아이템 추가하도록 업데이트
-                if tempnum > 4:
+                tempnum = random.randint(0, 10)  # 올라갈떄마다 아이템 추가하도록 업데이트
+                if tempnum < 3:
                     invincible_item = Item.InvincibleItem(self.player)
                     self.add_item(invincible_item, var.invincible_group)
-                elif tempnum < 2:
+                elif tempnum >= 3 and tempnum < 5:
                     instantkill_item = Item.InstantkillItem(self.player)
                     self.add_item(instantkill_item, var.instantkill_group)
-                else:
+                elif 5 <= tempnum < 7:
                     freeze_item = Item.FreezeItem(self.player)
                     self.add_item(freeze_item, var.freeze_group)
-
+                else:
+                    arrow_kill_item = Item.ArrowAllKillItem(self.player)
+                    self.add_item(arrow_kill_item, var.arrow_kill_group)
                 if var.probability[0] > 15:
                     var.probability[0] -= 3
                 level_up_time += 8000
@@ -167,7 +173,6 @@ class DodgeGame(Game):
                         f"FREEZE!!: {var.arrows.sprites()[0].freeze_end_time - time.time():.3f}sec", True,
                         consts.color["white"])
                     self.screen.blit(freeze_text, (10, 160))
-
 
             # 플레이어가 죽으면 중지
             if len(var.player_group.sprites()) == 0:
