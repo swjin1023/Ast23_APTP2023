@@ -68,5 +68,3 @@ class Player(pygame.sprite.Sprite):
         # invincible 속성 update 기준
         if self.invincible and time.time() >= self.invincible_end_time:
             self.invincible = False
-
-

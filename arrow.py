@@ -4,6 +4,8 @@ import consts
 import var
 from player import check_collision
 import time
+
+
 class Arrow(pygame.sprite.Sprite):
     """화살 객체 Parent"""
 
@@ -44,7 +46,6 @@ class Arrow(pygame.sprite.Sprite):
                 self.freeze = False
             else:
                 var.arrow_speed[0] = 0
-
 
 
 class TopArrow(Arrow):

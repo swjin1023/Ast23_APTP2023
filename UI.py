@@ -1,4 +1,3 @@
-import enum
 import tkinter as tk
 import sys
 import Game
@@ -64,41 +63,49 @@ class MainGameUI(PygameUI):
         pygame.draw.circle(self.screen, consts.color["black"], consts.const["center"],
                            consts.const["radius"] - consts.const["circle_width"])
 
-    def show_score(self):
+    def show_score(self, x, y):
         score_text = self.font.render("Score: " + str(var.current_score[0]), True, (255, 255, 255))
-        self.screen.blit(score_text, (10, 10))
+        self.screen.blit(score_text, (x, y))
 
-    def show_time(self, start_time, current_time):
+    def show_time(self, start_time, current_time, x, y):
         # 현재 경과 시간 표시
 
         var.elapsed_time[0] = (current_time - start_time) // 1000  # 밀리초를 초 단위로 변환
         minutes = var.elapsed_time[0] // 60  # 분 계산
         seconds = var.elapsed_time[0] % 60  # 초 계산
         text = self.font.render("{:02d}:{:02d}".format(minutes, seconds), True, (255, 255, 255))
-        self.screen.blit(text, (10, 40))
+        self.screen.blit(text, (x, y))
 
         return seconds
 
-    def show_level(self):
+    def show_level(self, x, y):
         # 현재 레벨 표시
         level_text = self.font.render(f"Level: {var.level[0]}", True, (255, 255, 255))
-        self.screen.blit(level_text, (10, 70))
+        self.screen.blit(level_text, (x, y))
+
+    def show_level_left_time(self, x, y, level_up_time, current_time):
+        if level_up_time > current_time:
+            left_time = level_up_time - current_time
+            level_left_time_text = self.font.render(f"Next Level in {(left_time//1000)%60:02d}:{left_time%1000:02d}sec", True, consts.color["white"])
+            self.screen.blit(level_left_time_text, (x, y))
+        else:
+            self.screen.blit(self.font.render("Level Up!", True, consts.color["white"]), (x, y))
 
 
 class EndUI(PygameUI):
     def game_over_screen(self):
         # Game over screen
-        game_over_text = self.font.render("Game Over", True, (0, 0, 0))
+        game_over_text = self.font.render("Game Over", True, consts.color["black"])
         game_over_rect = game_over_text.get_rect()
         game_over_rect.center = (consts.const["screen_width"] / 2, consts.const["screen_height"] / 2 - 50)
         self.screen.blit(game_over_text, game_over_rect)
 
     def show_score(self):
         # 이번 게임 score
-        score_text = self.font.render(f"Score: {var.current_score[0]}", True, (0, 0, 0))
+        score_text = self.font.render(f"Score: {var.current_score[0]}", True, consts.color["black"])
         score_text_rect = score_text.get_rect()
         score_text_rect.center = (consts.const["screen_width"] / 2 - 8,
-                                         consts.const["screen_height"] / 2 + 10)
+                                  consts.const["screen_height"] / 2 + 10)
         self.screen.blit(score_text, score_text_rect)
 
     def show_time(self):
@@ -108,24 +115,23 @@ class EndUI(PygameUI):
                                      True, (0, 0, 0))
         time_text_rect = time_text.get_rect()
         time_text_rect.center = (consts.const["screen_width"] / 2 - 13,
-                                        consts.const["screen_height"] / 2 + 50)
+                                 consts.const["screen_height"] / 2 + 50)
         self.screen.blit(time_text, time_text_rect)
 
     def show_level(self):
         # 이번 게임 최대 레벨
-        level_text = self.font.render(f"Level: {var.level[0]}", True, (0, 0, 0))
+        level_text = self.font.render(f"Level: {var.level[0]}", True, consts.color["black"])
         level_text_rect = level_text.get_rect()
         level_text_rect.center = (consts.const["screen_width"] / 2 - 26,
-                                         consts.const["screen_height"] / 2 + 90)
+                                  consts.const["screen_height"] / 2 + 90)
         self.screen.blit(level_text, level_text_rect)
 
-
-class PlayerStatus(PygameUI):
-    def __init__(self, screen, player, font):
-        super().__init__(screen, None, font)
-        self.player = player
-
-    def invincible(self):
-        if self.player.invincible:
-            invincible_text = self.font.render("INVINCIBLE!!", True, (255, 255, 255))
-            self.screen.blit(invincible_text, (10, 100))
+# class PlayerStatus(PygameUI):
+#     def __init__(self, screen, player, font):
+#         super().__init__(screen, None, font)
+#         self.player = player
+#
+#     def invincible(self):
+#         if self.player.invincible:
+#             invincible_text = self.font.render("INVINCIBLE!!", True, (255, 255, 255))
+#             self.screen.blit(invincible_text, (10, 100))

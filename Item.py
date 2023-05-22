@@ -51,6 +51,7 @@ class InstantkillItem(Item):
     def __init__(self, player):
         # self.image = pygame.transform.scale(pygame.image.load("questionbox.png"), (30, 30))
         super().__init__(player)
+        self.image = pygame.transform.scale(pygame.image.load("questionbox.png"), (30, 30))
         self.added_time = time.time()
 
     def update(self):
@@ -64,10 +65,6 @@ class FreezeItem(Item):
     def __init__(self, player):
         super().__init__(player)
         self.image = pygame.transform.scale(pygame.image.load("questionbox.png"), (30, 30))
-        # self.mask = pygame.mask.from_surface(self.image)
-        # self.rect = self.image.get_rect()
-        # self.width = self.image.get_width()
-        # self.height = self.image.get_height()
 
     def update(self):
         if pygame.sprite.spritecollide(self, var.player_group, False, collided=check_collision):
