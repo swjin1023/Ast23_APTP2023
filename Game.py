@@ -11,6 +11,27 @@ import var
 import consts
 
 
+def reset_var():
+    var.show_level.set(f"최고 레벨: {var.max_level[0]}")
+    var.show_score.set(f"최고 점수: {str(var.top_score[0])}")
+    var.show_time.set("최고 시간: {:02d}:{:02d}".format(var.max_time[0] // 60, var.max_time[0] % 60))
+
+    var.probability[0] = 60
+    var.level[0] = 1
+    var.current_score[0] = 0
+    var.elapsed_time[0] = 0
+
+
+def save_score():
+    # 충돌 후, 최고 점수 및 최고 시간 전역 변수에 기록
+    if var.current_score[0] > var.top_score[0]:
+        var.top_score[0] = var.current_score[0]
+    if var.elapsed_time[0] > var.max_time[0]:
+        var.max_time[0] = var.elapsed_time[0]
+    if var.level[0] > var.max_level[0]:
+        var.max_level[0] = var.level[0]
+
+
 class Game:
     def __init__(self):
         self.screen = None
@@ -37,25 +58,6 @@ class Game:
         var.all_sprites.add(new_item)
         var.items.add(new_item)
         sprite_group.add(new_item)
-
-    def save_score(self):
-        # 충돌 후, 최고 점수 및 최고 시간 전역 변수에 기록
-        if var.current_score[0] > var.top_score[0]:
-            var.top_score[0] = var.current_score[0]
-        if var.elapsed_time[0] > var.max_time[0]:
-            var.max_time[0] = var.elapsed_time[0]
-        if var.level[0] > var.max_level[0]:
-            var.max_level[0] = var.level[0]
-
-    def reset_var(self):
-        var.show_level.set(f"최고 레벨: {var.max_level[0]}")
-        var.show_score.set(f"최고 점수: {str(var.top_score[0])}")
-        var.show_time.set("최고 시간: {:02d}:{:02d}".format(var.max_time[0] // 60, var.max_time[0] % 60))
-
-        var.probability[0] = 60
-        var.level[0] = 1
-        var.current_score[0] = 0
-        var.elapsed_time[0] = 0
 
 
 class DodgeGame(Game):
@@ -96,7 +98,7 @@ class DodgeGame(Game):
 
         # Quit pygame
         pygame.quit()
-        self.reset_var()
+
 
     def game_start(self):
         """게임 시작 함수"""
@@ -141,7 +143,6 @@ class DodgeGame(Game):
                 if var.arrows.sprites()[0].freeze:
                     var.arrows.sprites().pop(-1)
 
-
             # level up
             if seconds > 0 and (current_time - start_time) >= level_up_time:
                 var.level[0] += 1
@@ -183,7 +184,7 @@ class DodgeGame(Game):
             var.all_sprites.draw(self.screen)
             pygame.display.flip()
 
-        self.save_score()
+        # save_score()
         var.all_sprites.empty()
         var.arrows.empty()
         self.game_over()

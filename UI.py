@@ -7,77 +7,76 @@ import pygame
 import consts
 
 
-class StartUI(tk.Frame):
-    """메인 화면(tkinter) UI class"""
-
-    def __init__(self, master):
-        super().__init__(master)
-        self.dodge_game = Game.DodgeGame()
-
-        master.geometry("450x450")
-        master.title("화살 피하기")
-        self.master = master
-
-        title_label = tk.Label(master, text="짭림고수", width=9, font=("Helvetica", 14))
-        title_label.pack(side="top")
-        game_start_button = tk.Button(master, height=4, width=8, text="게임 시작!", font=("Helvetica", 14),
-                                      command=self.dodge_game.game_start)
-        game_start_button.place(relx=0.2, rely=0.5, anchor=tk.CENTER)
-
-        game_start_button = tk.Button(master, height=4, width=8, text="최근 결과", font=("Helvetica", 14),
-                                      command=self.game_score_recent)
-        game_start_button.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-
-        exit_button = tk.Button(master, height=4, width=8, text="게임 종료", font=("Helvetica", 14),
-                                command=self.terminate)
-        exit_button.place(relx=0.8, rely=0.5, anchor=tk.CENTER)
-
-        var.show_level.set(f"최고 레벨: {var.max_level[0]}")
-        level_label = tk.Label(master, textvariable=var.show_level, font=("Helvetica", 14))
-        level_label.pack(side="bottom")
-
-        var.show_time.set("최고 시간: {:02d}:{:02d}".format(var.max_time[0] // 60, var.max_time[0] % 60))
-        time_label = tk.Label(master, textvariable=var.show_time, font=("Helvetica", 14))
-        time_label.pack(side="bottom")
-
-        var.show_score.set(f"최고 점수: {var.top_score[0]}")
-        score_label = tk.Label(master, textvariable=var.show_score, font=("Helvetica", 14))
-        score_label.pack(side="bottom")
-
-    def terminate(self):
-        """tkinter 종료 (전체 프로그램 종료) 함수"""
-        self.master.destroy()
-        sys.exit()
-
-    def game_score_recent(self):
-        new_window = tk.Toplevel(var.root)
-        new_window.title("최근 기록")
-        # 표 생성
-        self.table = ttk.Treeview(new_window)
-
-        # 열 이름 설정
-        self.table["columns"] = ("Name", "Age", "City")
-
-        # 각 열 설정
-        self.table.column("#0", width=50)  # 첫 번째 열(인덱스)의 너비 설정
-        self.table.column("Name", width=100)
-        self.table.column("Age", width=50)
-        self.table.column("City", width=100)
-
-        # 열 이름 표시
-        self.table.heading("#0", text="ID")
-        self.table.heading("Name", text="Name")
-        self.table.heading("Age", text="Age")
-        self.table.heading("City", text="City")
-
-        # 데이터 추가
-        self.table.insert(parent='', index='end', text="0", values=("John Doe", 30, "New York"))
-        self.table.insert(parent='', index='end', text="1", values=("Jane Smith", 25, "London"))
-        self.table.insert(parent='', index='end', text="2", values=("Bob Johnson", 35, "Paris"))
-
-        # 표 배치
-        self.table.pack()
-
+# class StartUI(tk.Frame):
+#     """메인 화면(tkinter) UI class"""
+#
+#     def __init__(self, master):
+#         super().__init__(master)
+#         self.dodge_game = Game.DodgeGame()
+#
+#         master.geometry("450x450")
+#         master.title("화살 피하기")
+#         self.master = master
+#
+#         title_label = tk.Label(master, text="짭림고수", width=9, font=("Helvetica", 14))
+#         title_label.pack(side="top")
+#         game_start_button = tk.Button(master, height=4, width=8, text="게임 시작!", font=("Helvetica", 14),
+#                                       command=self.dodge_game.game_start)
+#         game_start_button.place(relx=0.2, rely=0.5, anchor=tk.CENTER)
+#
+#         game_start_button = tk.Button(master, height=4, width=8, text="최근 결과", font=("Helvetica", 14),
+#                                       command=self.game_score_recent)
+#         game_start_button.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+#
+#         exit_button = tk.Button(master, height=4, width=8, text="게임 종료", font=("Helvetica", 14),
+#                                 command=self.terminate)
+#         exit_button.place(relx=0.8, rely=0.5, anchor=tk.CENTER)
+#
+#         var.show_level.set(f"최고 레벨: {var.max_level[0]}")
+#         level_label = tk.Label(master, textvariable=var.show_level, font=("Helvetica", 14))
+#         level_label.pack(side="bottom")
+#
+#         var.show_time.set("최고 시간: {:02d}:{:02d}".format(var.max_time[0] // 60, var.max_time[0] % 60))
+#         time_label = tk.Label(master, textvariable=var.show_time, font=("Helvetica", 14))
+#         time_label.pack(side="bottom")
+#
+#         var.show_score.set(f"최고 점수: {var.top_score[0]}")
+#         score_label = tk.Label(master, textvariable=var.show_score, font=("Helvetica", 14))
+#         score_label.pack(side="bottom")
+#
+#     def terminate(self):
+#         """tkinter 종료 (전체 프로그램 종료) 함수"""
+#         self.master.destroy()
+#         sys.exit()
+#
+#     def game_score_recent(self):
+#         new_window = tk.Toplevel(var.root)
+#         new_window.title("최근 기록")
+#         # 표 생성
+#         self.table = ttk.Treeview(new_window)
+#
+#         # 열 이름 설정
+#         self.table["columns"] = ("Name", "Age", "City")
+#
+#         # 각 열 설정
+#         self.table.column("#0", width=50)  # 첫 번째 열(인덱스)의 너비 설정
+#         self.table.column("Name", width=100)
+#         self.table.column("Age", width=50)
+#         self.table.column("City", width=100)
+#
+#         # 열 이름 표시
+#         self.table.heading("#0", text="ID")
+#         self.table.heading("Name", text="Name")
+#         self.table.heading("Age", text="Age")
+#         self.table.heading("City", text="City")
+#
+#         # 데이터 추가
+#         self.table.insert(parent='', index='end', text="0", values=("John Doe", 30, "New York"))
+#         self.table.insert(parent='', index='end', text="1", values=("Jane Smith", 25, "London"))
+#         self.table.insert(parent='', index='end', text="2", values=("Bob Johnson", 35, "Paris"))
+#
+#         # 표 배치
+#         self.table.pack()
 
 class PygameUI:
     def __init__(self, screen, background, font):
@@ -159,13 +158,3 @@ class EndUI(PygameUI):
         level_text_rect.center = (consts.const["screen_width"] / 2 - 26,
                                   consts.const["screen_height"] / 2 + 90)
         self.screen.blit(level_text, level_text_rect)
-
-# class PlayerStatus(PygameUI):
-#     def __init__(self, screen, player, font):
-#         super().__init__(screen, None, font)
-#         self.player = player
-#
-#     def invincible(self):
-#         if self.player.invincible:
-#             invincible_text = self.font.render("INVINCIBLE!!", True, (255, 255, 255))
-#             self.screen.blit(invincible_text, (10, 100))

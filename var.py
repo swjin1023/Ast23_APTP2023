@@ -1,6 +1,9 @@
 import tkinter as tk
 import pygame
+import UI_new
+
 root = tk.Tk()  # tkinter root
+#main_window = UI_new.MainWindow()
 
 # 전역 변수
 current_score = [0]  # 점수 (매 게임 마다)
