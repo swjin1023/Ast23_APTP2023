@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel, QPushButton, QDialog, QTableWidget, \
-    QTableWidgetItem, QGridLayout, QSizePolicy
+    QTableWidgetItem, QGridLayout, QSizePolicy, QWhatsThis
 from PyQt5.QtCore import Qt
 from PyQt5 import QtGui
 import csv
@@ -9,13 +9,22 @@ import var
 
 
 class NumericTableWidgetItem(QTableWidgetItem):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # self.ismillitime = ismillitime
+
     def __lt__(self, other):
         # 숫자 비교를 위한 재정의된 작은 값 비교 메서드
+        # if self.ismillitime is not None:
+        #     try:
+        #         return float(self.ismillitime.data(Qt.EditRole)) < float(other.ismillitime.data(Qt.EditRole))
+        #     except ValueError:
+        #         return super().__lt__(other)
+        # else:
         try:
             return float(self.data(Qt.EditRole)) < float(other.data(Qt.EditRole))
         except ValueError:
             return super().__lt__(other)
-
 
 class GameRecordDialog(QDialog):
     def __init__(self, parent=None):
@@ -24,7 +33,7 @@ class GameRecordDialog(QDialog):
         self.resize(500, 400)
         self.table_widget = QTableWidget()
         self.table_widget.setColumnCount(3)
-        self.table_widget.setHorizontalHeaderLabels(["경과 시간", "레벨", "점수"])
+        self.table_widget.setHorizontalHeaderLabels(["경과 시간(초)", "레벨", "점수"])
         # self.font = QtGui.QFont("noto", 10)
         # self.table_widget.setFont(self.font)
         self.table_widget.setSortingEnabled(True)
@@ -33,6 +42,7 @@ class GameRecordDialog(QDialog):
         layout.addWidget(self.table_widget)
         self.setLayout(layout)
 
+        self.setWhatsThis("This is a help text for the dialog.")
         self.load_records()
         self.table_widget.horizontalHeader().sectionClicked.connect(self.sort_table)
 
@@ -40,7 +50,13 @@ class GameRecordDialog(QDialog):
         self.table_widget.setRowCount(len(data))
         for row, record in enumerate(data):
             for column, value in enumerate(record):
-                item = NumericTableWidgetItem(value)
+                if column == 0:
+                    # minutes = (int(value) // 1000) // 60
+                    seconds = (int(value) // 1000) % 60
+                    milliseconds = int(value) % 1000
+                    item = NumericTableWidgetItem(f"{seconds}.{milliseconds}")
+                else:
+                    item = NumericTableWidgetItem(value)
                 self.table_widget.setItem(row, column, item)
                 item.setTextAlignment(Qt.AlignCenter)
 
@@ -124,8 +140,8 @@ class MainWindow(QMainWindow):
         layout.addWidget(game_record_button, 0, 1)
         layout.addWidget(game_exit_button, 0, 2)
         layout.addWidget(self.score_label, 2, 0)
-        layout.addWidget(self.level_label, 2, 1)
-        layout.addWidget(self.time_label, 2, 2)
+        layout.addWidget(self.level_label, 3, 0)
+        layout.addWidget(self.time_label, 4, 0)
 
         font = QtGui.QFont()
         font.setPointSize(11)
@@ -160,10 +176,12 @@ class MainWindow(QMainWindow):
             self.best_time = time
             self.time_label.setText(f"최고 시간: {self.best_time}")
 
-    def add_record(self, time, level, score):
+    def add_record(self, millitime, level, score):
         with open('game_records.csv', 'a', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow([time, level, score])
+            # minutes = (millitime // 1000) // 60
+            # seconds = (millitime // 1000) % 60
+            writer.writerow([millitime, level, score])
 
     def show_game_records(self):
         self.game_record_dialog.load_records()

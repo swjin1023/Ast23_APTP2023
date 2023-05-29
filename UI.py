@@ -103,9 +103,9 @@ class MainGameUI(PygameUI):
 
     def show_time(self, start_time, current_time, x, y):
         """현재 경과 시간 표시"""
-        var.elapsed_time[0] = (current_time - start_time) // 1000  # 밀리초를 초 단위로 변환
-        minutes = var.elapsed_time[0] // 60  # 분 계산
-        seconds = var.elapsed_time[0] % 60  # 초 계산
+        var.elapsed_time[0] = current_time - start_time  # 밀리초를 초 단위로 변환
+        minutes = var.elapsed_time[0] // 60000  # 분 계산
+        seconds = (var.elapsed_time[0] // 1000) % 60  # 초 계산
         text = self.font.render("{:02d}:{:02d}".format(minutes, seconds), True, (255, 255, 255))
         self.screen.blit(text, (x, y))
         return seconds
@@ -143,8 +143,8 @@ class EndUI(PygameUI):
 
     def show_time(self):
         """이번 게임 경과 시간"""
-        time_text = self.font.render("time: {:02d}:{:02d}".format(var.elapsed_time[0] // 60,
-                                                                  var.elapsed_time[0] % 60),
+        time_text = self.font.render("time: {:02d}:{:02d}".format(var.elapsed_time[0] // 60000,
+                                                                  (var.elapsed_time[0] // 1000) % 60),
                                      True, (0, 0, 0))
         time_text_rect = time_text.get_rect()
         time_text_rect.center = (consts.const["screen_width"] / 2 - 13,

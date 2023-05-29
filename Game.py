@@ -99,7 +99,6 @@ class DodgeGame(Game):
         # Quit pygame
         pygame.quit()
 
-
     def game_start(self):
         """게임 시작 함수"""
         super().game_start()
@@ -117,6 +116,10 @@ class DodgeGame(Game):
         # event
         running = True
         while running:
+
+            # 플레이어가 죽으면 중지
+            if len(var.player_group.sprites()) == 0:
+                running = False
 
             # 이벤트 처리
             for event in pygame.event.get():
@@ -175,9 +178,7 @@ class DodgeGame(Game):
                         consts.color["white"])
                     self.screen.blit(freeze_text, (10, 160))
 
-            # 플레이어가 죽으면 중지
-            if len(var.player_group.sprites()) == 0:
-                running = False
+
 
             # 게임 로직 및 게임 화면 update & draw
             var.all_sprites.update()
