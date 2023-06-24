@@ -1,6 +1,7 @@
+from datetime import datetime
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel, QPushButton, QDialog, QTableWidget, \
-    QTableWidgetItem, QGridLayout, QSizePolicy, QWhatsThis
+    QTableWidgetItem, QGridLayout, QSizePolicy, QWhatsThis, QMessageBox, QListWidget, QStackedWidget, QHBoxLayout
 from PyQt5.QtCore import Qt
 from PyQt5 import QtGui
 import csv
@@ -26,6 +27,37 @@ class NumericTableWidgetItem(QTableWidgetItem):
         except ValueError:
             return super().__lt__(other)
 
+
+class GameSettingDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("환경 설정")
+        self.resize(500, 400)
+
+        self.list_widget = QListWidget()
+        self.list_widget.addItem("Sound")
+        self.list_widget.addItem("Difficulty")
+        self.list_widget.currentRowChanged.connect(self.displayPage)
+        self.list_widget.resize(100, 400)
+
+        # 오른쪽 페이지 표시
+        self.stacked_widget = QStackedWidget()
+        self.sound_page = QLabel("Sound Settings")
+        self.difficulty_page = QLabel("Difficulty Settings")
+        self.stacked_widget.addWidget(self.sound_page)
+        self.stacked_widget.addWidget(self.difficulty_page)
+
+        # 레이아웃 설정
+        layout = QHBoxLayout()
+        layout.addWidget(self.list_widget)
+        layout.addWidget(self.stacked_widget)
+
+        self.setLayout(layout)
+
+    def displayPage(self, index):
+        self.stacked_widget.setCurrentIndex(index)
+
+
 class GameRecordDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -42,7 +74,7 @@ class GameRecordDialog(QDialog):
         layout.addWidget(self.table_widget)
         self.setLayout(layout)
 
-        self.setWhatsThis("This is a help text for the dialog.")
+        # self.setWhatsThis("This is a help text for the dialog.")
         self.load_records()
         self.table_widget.horizontalHeader().sectionClicked.connect(self.sort_table)
 
@@ -52,7 +84,7 @@ class GameRecordDialog(QDialog):
             for column, value in enumerate(record):
                 if column == 0:
                     # minutes = (int(value) // 1000) // 60
-                    seconds = (int(value) // 1000) % 60
+                    seconds = (int(value) // 1000) % 60 + ((int(value) // 1000) // 60) * 60
                     milliseconds = int(value) % 1000
                     item = NumericTableWidgetItem(f"{seconds}.{milliseconds}")
                 else:
@@ -111,9 +143,13 @@ class MainWindow(QMainWindow):
         # self.time_label.font()
         # self.time_label.setGeometry(250, 200, 70, 60)
 
+        self.title = QLabel("죽림고수")
+        self.title.setSizePolicy(size_policy)
+
         self.headers = ["score", "level", "time"]
         self.create_csv_file("game_records.csv", self.headers)
         self.game_record_dialog = GameRecordDialog(self)
+        self.game_setting_dialog = GameSettingDialog(self)
 
         self.dodge_game = Game.DodgeGame()
         game_start_button = QPushButton("게임 실행", self)
@@ -126,6 +162,10 @@ class MainWindow(QMainWindow):
         game_record_button.setSizePolicy(size_policy)
         # game_record_button.setGeometry(None, None, aw=110, ah=100)
 
+        game_setting_button = QPushButton("환경 설정", self)
+        game_setting_button.clicked.connect(self.show_game_setting)
+        game_setting_button.setSizePolicy(size_policy)
+
         game_exit_button = QPushButton("게임 종료", self)
         game_exit_button.clicked.connect(self.close)
         game_exit_button.setSizePolicy(size_policy)
@@ -136,12 +176,14 @@ class MainWindow(QMainWindow):
         # toolbar.addWidget(game_record_button)
         # toolbar.addWidget(game_exit_button)
 
-        layout.addWidget(game_start_button, 0, 0)
-        layout.addWidget(game_record_button, 0, 1)
-        layout.addWidget(game_exit_button, 0, 2)
-        layout.addWidget(self.score_label, 2, 0)
-        layout.addWidget(self.level_label, 3, 0)
-        layout.addWidget(self.time_label, 4, 0)
+        layout.addWidget(self.title, 0, 0, 1, 4, Qt.AlignCenter)
+        layout.addWidget(game_start_button, 3, 0)
+        layout.addWidget(game_record_button, 3, 2)
+        layout.addWidget(game_exit_button, 4, 2)
+        layout.addWidget(game_setting_button, 4, 0)
+        # layout.addWidget(self.score_label, 2, 0)
+        # layout.addWidget(self.level_label, 3, 0)
+        # layout.addWidget(self.time_label, 4, 0)
 
         font = QtGui.QFont()
         font.setPointSize(11)
@@ -150,6 +192,8 @@ class MainWindow(QMainWindow):
             if widget is not None:
                 widget.setFont(font)
 
+
+        self.statusBar().showMessage(datetime.today().strftime("%Y/%m/%d %H:%M:%S"))
         self.best_score = 0
         self.best_level = 0
         self.best_time = 0
@@ -174,18 +218,20 @@ class MainWindow(QMainWindow):
             self.level_label.setText(f"최고 레벨: {self.best_level}")
         if time >= self.best_time:
             self.best_time = time
-            self.time_label.setText(f"최고 시간: {self.best_time}")
+            self.time_label.setText(
+                f"최고 시간: {(self.best_time // 1000) % 60 + ((self.best_time // 1000) // 60) * 60}.{self.best_time % 1000}초")
 
     def add_record(self, millitime, level, score):
         with open('game_records.csv', 'a', newline='') as file:
             writer = csv.writer(file)
-            # minutes = (millitime // 1000) // 60
-            # seconds = (millitime // 1000) % 60
             writer.writerow([millitime, level, score])
 
     def show_game_records(self):
         self.game_record_dialog.load_records()
         self.game_record_dialog.exec_()
+
+    def show_game_setting(self):
+        self.game_setting_dialog.exec_()
 
     def create_csv_file(self, filename, headers=None):
         with open(filename, 'w', newline='') as file:
@@ -196,6 +242,21 @@ class MainWindow(QMainWindow):
     def on_closing(self):
         with open('game_records.csv', 'w') as file:
             file.truncate()
+
+    def close(self):
+        msgBox = QMessageBox()
+        reply = msgBox.question(
+            None,
+            "Exit",
+            "종료 하시겠습니까?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        if reply == QMessageBox.Yes:
+            super().close()
+
+    def show_today_date(self):
+        pass
 
 
 if __name__ == '__main__':

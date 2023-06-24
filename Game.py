@@ -178,8 +178,6 @@ class DodgeGame(Game):
                         consts.color["white"])
                     self.screen.blit(freeze_text, (10, 160))
 
-
-
             # 게임 로직 및 게임 화면 update & draw
             var.all_sprites.update()
             var.all_sprites.draw(self.screen)

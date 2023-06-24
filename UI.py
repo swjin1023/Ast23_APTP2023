@@ -1,7 +1,7 @@
-import tkinter as tk
-from tkinter import ttk
-import sys
-import Game
+# import tkinter as tk
+# from tkinter import ttk
+# import sys
+# import Game
 import var
 import pygame
 import consts
