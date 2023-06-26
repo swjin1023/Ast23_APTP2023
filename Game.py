@@ -37,7 +37,7 @@ class Game:
     def game_over(self):
         pass
 
-    def game_start(self):
+    def game_start(self, *args, **kwargs):
         pygame.init()
 
     def add_player(self):
@@ -92,10 +92,10 @@ class DodgeGame(Game):
         pygame.display.update()
         pygame.time.wait(3000)
 
-        # Quit pygame
-        pygame.quit()
+        # Quit pygame display
+        pygame.display.quit()
 
-    def game_start(self, lvluptime=8000, ItemMode=True):
+    def game_start(self, lvluptime, ItemMode):
         """게임 시작 함수"""
         super().game_start()
         self.screen = pygame.display.set_mode(
@@ -109,7 +109,7 @@ class DodgeGame(Game):
         start_time = pygame.time.get_ticks()  # 경과 시간 표시하기 위해 가져옴.
         level_up_time = lvluptime
         level_up_periods = lvluptime
-
+        flag = 0
         # event
         running = True
         while running:
@@ -129,10 +129,13 @@ class DodgeGame(Game):
             baseUI.draw_background()
             baseUI.draw_circle_boundary()
             baseUI.show_score(10, 10)
+            if not flag:
+                current_time_base = pygame.time.get_ticks()
+                flag += 1
             current_time = pygame.time.get_ticks()
             seconds = UI_new.MainGameUI.show_time(baseUI, start_time, current_time, 10, 40)
             baseUI.show_level(10, 70)
-            baseUI.show_level_left_time(10, 100, level_up_time, current_time)
+            baseUI.show_level_left_time(10, 100, level_up_time, current_time - current_time_base)
 
             # FPS
             clock.tick(60)

@@ -13,9 +13,8 @@ import consts
 
 global ItemMode, volume
 ItemMode = True
-volume = 0.5
-file_path = "main_bg.mp3"
 
+volume = 0.5
 
 
 class PygameUI:
@@ -270,20 +269,11 @@ class MainUi(QMainWindow):
         self.resize(500, 400)
         self.setWindowTitle("죽림고수")
 
-        # # 배경음악 파일 경로
-        # music_file = QUrl.fromLocalFile("../main_bg.mp3")
-        # content = QtMultimedia.QMediaContent(music_file)
-        # # QMediaPlayer 객체 생성
-        # player = QtMultimedia.QMediaPlayer()
-        #
-        # # 배경음악 설정
-        # player.setMedia(content)
-        # player.setVolume(80)
-        # 배경음악 재생
-        # player.play()
+        file_path = "main_bg.mp3"
         pygame.mixer.init()
         pygame.mixer.music.load(file_path)
         pygame.mixer.music.play()
+        pygame.mixer.music.set_volume(volume)
 
         self.dodge_game = Game.DodgeGame()
 
