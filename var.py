@@ -28,4 +28,9 @@ for item in sprite_group:
     all_sprites.add(item)
 
 arrow_speed = [1]
-level_up_time = [7000]
+level_up_time = [8000]
+
+volume = 0.5
+
+
+
