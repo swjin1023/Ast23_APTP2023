@@ -1,27 +1,112 @@
 from datetime import datetime
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel, QPushButton, QDialog, QTableWidget, \
-    QTableWidgetItem, QGridLayout, QSizePolicy, QWhatsThis, QMessageBox, QListWidget, QStackedWidget, QHBoxLayout
-from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QDialog, QTableWidget, QTableWidgetItem, QMessageBox
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import Qt, QTimer, QUrl
 from PyQt5 import QtGui
 import csv
 import Game
 import var
+import pygame
+import consts
+
+global ItemMode, volume
+ItemMode = True
+volume = 0.5
+file_path = "main_bg.mp3"
+
+
+
+class PygameUI:
+    def __init__(self, screen, background, font):
+        self.screen = screen
+        self.bg_img = background
+        self.font = font
+
+
+class MainGameUI(PygameUI):
+    def draw_background(self):
+        """배경 이미지 blit"""
+        self.screen.blit(self.bg_img, (0, 0))
+
+    def draw_circle_boundary(self):
+        """가운데 원 그리기"""
+        pygame.draw.circle(self.screen, consts.color["white"], consts.const["center"], consts.const["radius"])
+        pygame.draw.circle(self.screen, consts.color["black"], consts.const["center"],
+                           consts.const["radius"] - consts.const["circle_width"])
+
+    def show_score(self, x, y):
+        """점수 text blit"""
+        score_text = self.font.render("Score: " + str(var.current_score[0]), True, (255, 255, 255))
+        self.screen.blit(score_text, (x, y))
+
+    def show_time(self, start_time, current_time, x, y):
+        """현재 경과 시간 표시"""
+        var.elapsed_time[0] = current_time - start_time  # 밀리초를 초 단위로 변환
+        minutes = var.elapsed_time[0] // 60000  # 분 계산
+        seconds = (var.elapsed_time[0] // 1000) % 60  # 초 계산
+        text = self.font.render("{:02d}:{:02d}".format(minutes, seconds), True, (255, 255, 255))
+        self.screen.blit(text, (x, y))
+        return seconds
+
+    def show_level(self, x, y):
+        # 현재 레벨 표시
+        level_text = self.font.render(f"Level: {var.level[0]}", True, (255, 255, 255))
+        self.screen.blit(level_text, (x, y))
+
+    def show_level_left_time(self, x, y, level_up_time, current_time):
+        if level_up_time > current_time:
+            left_time = level_up_time - current_time
+            level_left_time_text = self.font.render(
+                f"Next Level in {(left_time // 1000) % 60:02d}:{left_time % 1000:02d}sec", True, consts.color["white"])
+            self.screen.blit(level_left_time_text, (x, y))
+        else:
+            self.screen.blit(self.font.render("Level Up!", True, consts.color["white"]), (x, y))
+
+
+class EndUI(PygameUI):
+    def game_over_screen(self):
+        # Game over screen
+        game_over_text = self.font.render("Game Over", True, consts.color["black"])
+        game_over_rect = game_over_text.get_rect()
+        game_over_rect.center = (consts.const["screen_width"] / 2, consts.const["screen_height"] / 2 - 50)
+        self.screen.blit(game_over_text, game_over_rect)
+
+    def show_score(self):
+        """이번 게임 score"""
+        score_text = self.font.render(f"Score: {var.current_score[0]}", True, consts.color["black"])
+        score_text_rect = score_text.get_rect()
+        score_text_rect.center = (consts.const["screen_width"] / 2 - 8,
+                                  consts.const["screen_height"] / 2 + 10)
+        self.screen.blit(score_text, score_text_rect)
+
+    def show_time(self):
+        """이번 게임 경과 시간"""
+        time_text = self.font.render("time: {:02d}:{:02d}".format(var.elapsed_time[0] // 60000,
+                                                                  (var.elapsed_time[0] // 1000) % 60),
+                                     True, (0, 0, 0))
+        time_text_rect = time_text.get_rect()
+        time_text_rect.center = (consts.const["screen_width"] / 2 - 13,
+                                 consts.const["screen_height"] / 2 + 50)
+        self.screen.blit(time_text, time_text_rect)
+
+    def show_level(self):
+        """이번 게임 최대 레벨"""
+        level_text = self.font.render(f"Level: {var.level[0]}", True, consts.color["black"])
+        level_text_rect = level_text.get_rect()
+        level_text_rect.center = (consts.const["screen_width"] / 2 - 26,
+                                  consts.const["screen_height"] / 2 + 90)
+        self.screen.blit(level_text, level_text_rect)
 
 
 class NumericTableWidgetItem(QTableWidgetItem):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.ismillitime = ismillitime
 
     def __lt__(self, other):
         # 숫자 비교를 위한 재정의된 작은 값 비교 메서드
-        # if self.ismillitime is not None:
-        #     try:
-        #         return float(self.ismillitime.data(Qt.EditRole)) < float(other.ismillitime.data(Qt.EditRole))
-        #     except ValueError:
-        #         return super().__lt__(other)
-        # else:
+
         try:
             return float(self.data(Qt.EditRole)) < float(other.data(Qt.EditRole))
         except ValueError:
@@ -31,32 +116,97 @@ class NumericTableWidgetItem(QTableWidgetItem):
 class GameSettingDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("환경 설정")
-        self.resize(500, 400)
+        self.setupUi(self)
 
-        self.list_widget = QListWidget()
-        self.list_widget.addItem("Sound")
-        self.list_widget.addItem("Difficulty")
-        self.list_widget.currentRowChanged.connect(self.displayPage)
-        self.list_widget.resize(100, 400)
+    def setupUi(self, Dialog):
+        Dialog.setObjectName("Dialog")
+        Dialog.resize(508, 363)
+        self.groupBox_2 = QtWidgets.QGroupBox(Dialog)
+        self.groupBox_2.setGeometry(QtCore.QRect(70, 160, 371, 151))
+        self.groupBox_2.setFlat(False)
+        self.groupBox_2.setObjectName("groupBox_2")
 
-        # 오른쪽 페이지 표시
-        self.stacked_widget = QStackedWidget()
-        self.sound_page = QLabel("Sound Settings")
-        self.difficulty_page = QLabel("Difficulty Settings")
-        self.stacked_widget.addWidget(self.sound_page)
-        self.stacked_widget.addWidget(self.difficulty_page)
+        self.ItemModeCheckBox = QtWidgets.QCheckBox(self.groupBox_2)
+        self.ItemModeCheckBox.setGeometry(QtCore.QRect(40, 40, 96, 19))
+        self.ItemModeCheckBox.setObjectName("checkBox")
+        self.ItemModeCheckBox.setChecked(True)
+        self.ItemModeCheckBox.stateChanged.connect(self.setItemMode)
 
-        # 레이아웃 설정
-        layout = QHBoxLayout()
-        layout.addWidget(self.list_widget)
-        layout.addWidget(self.stacked_widget)
+        self.arrowSpeedBox = QtWidgets.QDoubleSpinBox(self.groupBox_2)
+        self.arrowSpeedBox.setGeometry(QtCore.QRect(220, 70, 91, 22))
+        self.arrowSpeedBox.setMaximum(10.0)
+        self.arrowSpeedBox.setMinimum(0.1)
+        self.arrowSpeedBox.setSingleStep(0.1)
+        self.arrowSpeedBox.setProperty("value", 1.0)
+        self.arrowSpeedBox.setObjectName("doubleSpinBox")
+        self.arrowSpeedBox.valueChanged.connect(self.changeArrowSpeed)
 
-        self.setLayout(layout)
+        self.label_2 = QtWidgets.QLabel(self.groupBox_2)
+        self.label_2.setGeometry(QtCore.QRect(40, 72, 91, 16))
+        self.label_2.setObjectName("label_2")
+        self.label_3 = QtWidgets.QLabel(self.groupBox_2)
+        self.label_3.setGeometry(QtCore.QRect(40, 102, 101, 16))
+        self.label_3.setObjectName("label_3")
 
-    def displayPage(self, index):
-        self.stacked_widget.setCurrentIndex(index)
+        self.lvupTimeBox = QtWidgets.QSpinBox(self.groupBox_2)
+        self.lvupTimeBox.setGeometry(QtCore.QRect(220, 100, 91, 22))
+        self.lvupTimeBox.setMaximum(16)
+        self.lvupTimeBox.setSingleStep(1)
+        self.lvupTimeBox.setMinimum(1)
+        self.lvupTimeBox.setProperty("value", 8)
+        self.lvupTimeBox.setObjectName("doubleSpinBox_2")
+        self.lvupTimeBox.valueChanged.connect(self.changeLevelUpTime)
 
+        self.groupBox = QtWidgets.QGroupBox(Dialog)
+        self.groupBox.setGeometry(QtCore.QRect(70, 50, 371, 91))
+        self.groupBox.setObjectName("groupBox")
+
+        self.volumeSlider = QtWidgets.QSlider(self.groupBox)
+        self.volumeSlider.setGeometry(QtCore.QRect(180, 40, 160, 22))
+        self.volumeSlider.setSliderPosition(50)
+        self.volumeSlider.setOrientation(QtCore.Qt.Horizontal)
+        self.volumeSlider.setInvertedAppearance(False)
+        self.volumeSlider.setInvertedControls(False)
+        self.volumeSlider.setTickPosition(QtWidgets.QSlider.TicksAbove)
+        self.volumeSlider.setTickInterval(10)
+        self.volumeSlider.setObjectName("horizontalSlider")
+        self.volumeSlider.valueChanged.connect(self.changeVolume)
+        self.label = QtWidgets.QLabel(self.groupBox)
+        self.label.setGeometry(QtCore.QRect(40, 40, 101, 16))
+        self.label.setObjectName("label")
+
+        self.retranslateUi(Dialog)
+        QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+    def retranslateUi(self, Dialog):
+        _translate = QtCore.QCoreApplication.translate
+        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        self.groupBox_2.setTitle(_translate("Dialog", "Difficulty"))
+        self.ItemModeCheckBox.setText(_translate("Dialog", "Item"))
+        self.arrowSpeedBox.setToolTip(_translate("Dialog", "<html><head/><body><p>dx, dy value</p></body></html>"))
+        self.label_2.setText(_translate("Dialog", "Arrow Speed"))
+        self.label_3.setText(_translate("Dialog", "Level Up Time"))
+        self.lvupTimeBox.setToolTip(_translate("Dialog", "<html><head/><body><p>seconds</p></body></html>"))
+        self.groupBox.setTitle(_translate("Dialog", "Sound"))
+        self.label.setText(_translate("Dialog", "Master Volume"))
+
+    def changeArrowSpeed(self):
+        var.arrow_speed[0] = self.arrowSpeedBox.value()
+
+    def changeLevelUpTime(self):
+        var.level_up_time[0] = self.lvupTimeBox.value() * 1000
+
+    def setItemMode(self):
+        global ItemMode
+        if self.ItemModeCheckBox.isChecked():
+            ItemMode = True
+        else:
+            ItemMode = False
+
+    def changeVolume(self):
+        global volume
+        volume = self.volumeSlider.value() / 100.0
+        pygame.mixer.music.set_volume(volume)
 
 class GameRecordDialog(QDialog):
     def __init__(self, parent=None):
@@ -114,92 +264,178 @@ class GameRecordDialog(QDialog):
         event.accept()
 
 
-class MainWindow(QMainWindow):
+class MainUi(QMainWindow):
     def __init__(self):
         super().__init__()
         self.resize(500, 400)
         self.setWindowTitle("죽림고수")
 
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        layout = QGridLayout(central_widget)
-        size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        # # 배경음악 파일 경로
+        # music_file = QUrl.fromLocalFile("../main_bg.mp3")
+        # content = QtMultimedia.QMediaContent(music_file)
+        # # QMediaPlayer 객체 생성
+        # player = QtMultimedia.QMediaPlayer()
+        #
+        # # 배경음악 설정
+        # player.setMedia(content)
+        # player.setVolume(80)
+        # 배경음악 재생
+        # player.play()
+        pygame.mixer.init()
+        pygame.mixer.music.load(file_path)
+        pygame.mixer.music.play()
 
-        self.score_label = QLabel("최고 점수: None")
-        self.score_label.setSizePolicy(size_policy)
-        # self.setCentralWidget(self.score_label)
-        # self.score_label.font()
-        # self.score_label.setGeometry(150, 200, 70, 60)
-
-        self.level_label = QLabel("최고 레벨: None")
-        self.level_label.setSizePolicy(size_policy)
-        # self.setCentralWidget(self.level_label)
-        # self.level_label.font()
-        # self.level_label.setGeometry(200, 200, 70, 60)
-
-        self.time_label = QLabel("최고 시간: None")
-        self.time_label.setSizePolicy(size_policy)
-        # self.setCentralWidget(self.time_label)
-        # self.time_label.font()
-        # self.time_label.setGeometry(250, 200, 70, 60)
-
-        self.title = QLabel("죽림고수")
-        self.title.setSizePolicy(size_policy)
+        self.dodge_game = Game.DodgeGame()
 
         self.headers = ["score", "level", "time"]
         self.create_csv_file("game_records.csv", self.headers)
         self.game_record_dialog = GameRecordDialog(self)
-        self.game_setting_dialog = GameSettingDialog(self)
+        self.game_setting_widget = GameSettingDialog(self)
 
-        self.dodge_game = Game.DodgeGame()
-        game_start_button = QPushButton("게임 실행", self)
-        game_start_button.clicked.connect(self.game_start)
-        game_start_button.setSizePolicy(size_policy)
-        # game_start_button.setGeometry(None, None, aw=110, ah=100)
-
-        game_record_button = QPushButton("게임 기록", self)
-        game_record_button.clicked.connect(self.show_game_records)
-        game_record_button.setSizePolicy(size_policy)
-        # game_record_button.setGeometry(None, None, aw=110, ah=100)
-
-        game_setting_button = QPushButton("환경 설정", self)
-        game_setting_button.clicked.connect(self.show_game_setting)
-        game_setting_button.setSizePolicy(size_policy)
-
-        game_exit_button = QPushButton("게임 종료", self)
-        game_exit_button.clicked.connect(self.close)
-        game_exit_button.setSizePolicy(size_policy)
-        # game_exit_button.setGeometry(None, None, aw=110, ah=100)
-
-        # toolbar = self.addToolBar("Toolbar")
-        # toolbar.addWidget(game_start_button)
-        # toolbar.addWidget(game_record_button)
-        # toolbar.addWidget(game_exit_button)
-
-        layout.addWidget(self.title, 0, 0, 1, 4, Qt.AlignCenter)
-        layout.addWidget(game_start_button, 3, 0)
-        layout.addWidget(game_record_button, 3, 2)
-        layout.addWidget(game_exit_button, 4, 2)
-        layout.addWidget(game_setting_button, 4, 0)
-        # layout.addWidget(self.score_label, 2, 0)
-        # layout.addWidget(self.level_label, 3, 0)
-        # layout.addWidget(self.time_label, 4, 0)
-
-        font = QtGui.QFont()
-        font.setPointSize(11)
-        for index in range(layout.count()):
-            widget = layout.itemAt(index).widget()
-            if widget is not None:
-                widget.setFont(font)
-
-
-        self.statusBar().showMessage(datetime.today().strftime("%Y/%m/%d %H:%M:%S"))
         self.best_score = 0
         self.best_level = 0
         self.best_time = 0
+        label_color = "white"
+        style_sheet = f"color: {label_color};"
+        # self.set_transparent_image("background2.png", 0.5)  # 이미지 파일 경로와 투명도를 설정합니다.
+        self.set_background_image("background.jpg")
+
+        self.timer = QTimer(self)
+        self.show_today_date()
+        self.timer.start(1000)
+        self.timer.timeout.connect(self.show_today_date)
+
+        self.font = QtGui.QFont()
+        self.font.setFamily("맑은 고딕")
+        self.font.setPointSize(14)
+
+        self.setObjectName("MainWindow")
+        self.resize(798, 585)
+        self.centralwidget = QtWidgets.QWidget()
+        self.centralwidget.setObjectName("centralwidget")
+        self.label = QtWidgets.QLabel(self.centralwidget)
+        self.label.setGeometry(QtCore.QRect(150, 60, 471, 91))
+        self.label.setStyleSheet(style_sheet)
+
+        font = QtGui.QFont()
+        font.setFamily("맑은 고딕")
+        font.setPointSize(28)
+        font.setBold(True)
+        self.label.setFont(font)
+        self.label.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.setObjectName("label")
+        self.verticalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
+        self.verticalLayoutWidget.setGeometry(QtCore.QRect(400, 200, 291, 221))
+        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
+        self.verticalLayout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout.setSpacing(8)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.gameStartButton = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.gameStartButton.clicked.connect(self.game_start)
+        # font = QtGui.QFont()
+        # font.setFamily("맑은 고딕")
+        # font.setPointSize(16)
+        self.gameStartButton.setFont(self.font)
+        self.gameStartButton.setObjectName("pushButton")
+        self.verticalLayout.addWidget(self.gameStartButton)
+        self.recordButton = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.recordButton.clicked.connect(self.show_game_records)
+        # font = QtGui.QFont()
+        # font.setFamily("맑은 고딕")
+        # font.setPointSize(16)
+        self.recordButton.setFont(self.font)
+        self.recordButton.setObjectName("pushButton_2")
+        self.verticalLayout.addWidget(self.recordButton)
+        self.settingButton = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.settingButton.clicked.connect(self.show_game_setting)
+        # font = QtGui.QFont()
+        # font.setFamily("맑은 고딕")
+        # font.setPointSize(16)
+        self.settingButton.setFont(self.font)
+        self.settingButton.setObjectName("pushButton_4")
+        self.verticalLayout.addWidget(self.settingButton)
+        self.exitButton = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.exitButton.clicked.connect(self.close)
+        # font = QtGui.QFont()
+        # font.setFamily("맑은 고딕")
+        # font.setPointSize(16)
+
+        self.verticalLayoutWidget_2 = QtWidgets.QWidget(self.centralwidget)
+        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(90, 230, 241, 141))
+        self.verticalLayoutWidget_2.setObjectName("verticalLayoutWidget_2")
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_2)
+        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.time_label = QtWidgets.QLabel(self.verticalLayoutWidget_2)
+        scoreGroupLabelFont = QtGui.QFont()
+        scoreGroupLabelFont.setFamily("맑은 고딕")
+        scoreGroupLabelFont.setPointSize(13)
+        scoreGroupLabelFont.setBold(True)
+
+        self.time_label.setFont(scoreGroupLabelFont)
+        self.time_label.setObjectName("label_2")
+        self.time_label.setStyleSheet(style_sheet)
+        self.verticalLayout_2.addWidget(self.time_label)
+
+        self.level_label = QtWidgets.QLabel(self.verticalLayoutWidget_2)
+        self.level_label.setFont(scoreGroupLabelFont)
+        self.level_label.setObjectName("label_3")
+        self.level_label.setStyleSheet(style_sheet)
+        self.verticalLayout_2.addWidget(self.level_label)
+
+        self.score_label = QtWidgets.QLabel(self.verticalLayoutWidget_2)
+        self.score_label.setFont(scoreGroupLabelFont)
+        self.score_label.setObjectName("label_4")
+        self.score_label.setStyleSheet(style_sheet)
+        self.verticalLayout_2.addWidget(self.score_label)
+        self.setCentralWidget(self.centralwidget)
+
+        self.exitButton.setFont(self.font)
+        self.exitButton.setObjectName("pushButton_3")
+        self.verticalLayout.addWidget(self.exitButton)
+        self.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar()
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 798, 26))
+        self.menubar.setDefaultUp(True)
+        self.menubar.setNativeMenuBar(True)
+        self.menubar.setObjectName("menubar")
+        self.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar()
+        self.statusbar.setEnabled(True)
+        self.statusbar.setSizeGripEnabled(False)
+        self.statusbar.setObjectName("statusbar")
+        self.setStatusBar(self.statusbar)
+
+        self.retranslateUi(self)
+        QtCore.QMetaObject.connectSlotsByName(self)
+
+
+    def set_transparent_image(self, image_path, opacity):
+        pixmap = QPixmap(image_path)
+        pixmap = pixmap.scaled(self.size(), aspectRatioMode=QtCore.Qt.IgnoreAspectRatio)
+
+        palette = self.palette()
+        palette.setBrush(QtGui.QPalette.Background, QtGui.QBrush(pixmap))
+        self.setPalette(palette)
+
+        transparent_pixmap = QPixmap(pixmap.size())
+        transparent_pixmap.fill(QtCore.Qt.transparent)
+
+        painter = QtGui.QPainter(transparent_pixmap)
+        painter.setOpacity(opacity)
+        painter.drawPixmap(0, 0, pixmap)
+        painter.end()
+
+        label = QtWidgets.QLabel(self)
+        label.setPixmap(transparent_pixmap)
+        label.setGeometry(50, 50, pixmap.width(), pixmap.height())
 
     def game_start(self):
-        self.dodge_game.game_start()
+        global ItemMode
+        self.dodge_game.game_start(var.level_up_time[0], ItemMode)
         score = var.current_score[0]
         level = var.level[0]
         time = var.elapsed_time[0]
@@ -209,17 +445,37 @@ class MainWindow(QMainWindow):
         self.update_best_score(var.top_score[0], var.max_level[0], var.max_time[0])
         Game.reset_var()
 
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "죽림고수"))
+        self.label.setText(_translate("MainWindow", "죽림고수"))
+        self.gameStartButton.setText(_translate("MainWindow", "Game Start"))
+        self.recordButton.setText(_translate("MainWindow", "Records"))
+        self.settingButton.setText(_translate("MainWindow", "Settings"))
+        self.exitButton.setText(_translate("MainWindow", "Exit"))
+        self.time_label.setText(_translate("MainWindow", "Best Time: None"))
+        self.level_label.setText(_translate("MainWindow", "Best score: None"))
+        self.score_label.setText(_translate("MainWindow", "Best level: None"))
+
+    def set_background_image(self, image_path):
+        pixmap = QPixmap(image_path)
+        background = pixmap.scaled(self.size(), aspectRatioMode=QtCore.Qt.IgnoreAspectRatio)
+
+        palette = self.palette()
+        palette.setBrush(QtGui.QPalette.Background, QtGui.QBrush(background))
+        self.setPalette(palette)
+
     def update_best_score(self, score, level, time):
         if score >= self.best_score:
             self.best_score = score
-            self.score_label.setText(f"최고 점수: {self.best_score}")
+            self.score_label.setText(f"Best score: {self.best_score}")
         if level >= self.best_level:
             self.best_level = level
-            self.level_label.setText(f"최고 레벨: {self.best_level}")
+            self.level_label.setText(f"Best level: {self.best_level}")
         if time >= self.best_time:
             self.best_time = time
             self.time_label.setText(
-                f"최고 시간: {(self.best_time // 1000) % 60 + ((self.best_time // 1000) // 60) * 60}.{self.best_time % 1000}초")
+                f"Best time: {(self.best_time // 1000) % 60 + ((self.best_time // 1000) // 60) * 60}.{self.best_time % 1000}초")
 
     def add_record(self, millitime, level, score):
         with open('game_records.csv', 'a', newline='') as file:
@@ -231,7 +487,7 @@ class MainWindow(QMainWindow):
         self.game_record_dialog.exec_()
 
     def show_game_setting(self):
-        self.game_setting_dialog.exec_()
+        self.game_setting_widget.exec_()
 
     def create_csv_file(self, filename, headers=None):
         with open(filename, 'w', newline='') as file:
@@ -256,13 +512,12 @@ class MainWindow(QMainWindow):
             super().close()
 
     def show_today_date(self):
-        pass
+        self.statusBar().showMessage(datetime.today().strftime("%Y/%m/%d %H:%M:%S"))
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-
-    main_window = MainWindow()
-    main_window.show()
-    app.aboutToQuit.connect(main_window.on_closing)
+    app = QtWidgets.QApplication(sys.argv)
+    ui = MainUi()
+    ui.show()
+    app.aboutToQuit.connect(ui.on_closing)
     sys.exit(app.exec_())

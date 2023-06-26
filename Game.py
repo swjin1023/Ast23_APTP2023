@@ -1,4 +1,4 @@
-import UI
+import UI_new
 import pygame
 import random
 import time
@@ -12,10 +12,6 @@ import consts
 
 
 def reset_var():
-    var.show_level.set(f"최고 레벨: {var.max_level[0]}")
-    var.show_score.set(f"최고 점수: {str(var.top_score[0])}")
-    var.show_time.set("최고 시간: {:02d}:{:02d}".format(var.max_time[0] // 60, var.max_time[0] % 60))
-
     var.probability[0] = 60
     var.level[0] = 1
     var.current_score[0] = 0
@@ -86,7 +82,7 @@ class DodgeGame(Game):
         """게임 종료 함수"""
         self.screen.fill(consts.color["white"])
         font = pygame.font.SysFont(None, 50)
-        baseUI = UI.EndUI(self.screen, None, font)
+        baseUI = UI_new.EndUI(self.screen, None, font)
 
         baseUI.game_over_screen()
         baseUI.show_time()
@@ -94,12 +90,12 @@ class DodgeGame(Game):
         baseUI.show_score()
 
         pygame.display.update()
-        pygame.time.wait(2000)
+        pygame.time.wait(3000)
 
         # Quit pygame
         pygame.quit()
 
-    def game_start(self):
+    def game_start(self, lvluptime=8000, ItemMode=True):
         """게임 시작 함수"""
         super().game_start()
         self.screen = pygame.display.set_mode(
@@ -111,7 +107,8 @@ class DodgeGame(Game):
         # save start time, set level-up time
         clock = pygame.time.Clock()
         start_time = pygame.time.get_ticks()  # 경과 시간 표시하기 위해 가져옴.
-        level_up_time = 8000
+        level_up_time = lvluptime
+        level_up_periods = lvluptime
 
         # event
         running = True
@@ -128,12 +125,12 @@ class DodgeGame(Game):
 
             # UI
             font = pygame.font.SysFont(None, 30)
-            baseUI = UI.MainGameUI(self.screen, self.bg_img, font)
+            baseUI = UI_new.MainGameUI(self.screen, self.bg_img, font)
             baseUI.draw_background()
             baseUI.draw_circle_boundary()
             baseUI.show_score(10, 10)
             current_time = pygame.time.get_ticks()
-            seconds = UI.MainGameUI.show_time(baseUI, start_time, current_time, 10, 40)
+            seconds = UI_new.MainGameUI.show_time(baseUI, start_time, current_time, 10, 40)
             baseUI.show_level(10, 70)
             baseUI.show_level_left_time(10, 100, level_up_time, current_time)
 
@@ -143,28 +140,30 @@ class DodgeGame(Game):
             # make arrow
             self.make_arrow(self.player)
             if var.arrows:
-                if var.arrows.sprites()[0].freeze:
+                if var.arrow_speed[0] == 0:
                     var.arrows.sprites().pop(-1)
 
             # level up
+
             if seconds > 0 and (current_time - start_time) >= level_up_time:
                 var.level[0] += 1
-                tempnum = random.randint(0, 10)  # 올라갈떄마다 아이템 추가하도록 업데이트
-                if tempnum < 3:
-                    invincible_item = Item.InvincibleItem(self.player)
-                    self.add_item(invincible_item, var.invincible_group)
-                elif tempnum >= 3 and tempnum < 5:
-                    instantkill_item = Item.InstantkillItem(self.player)
-                    self.add_item(instantkill_item, var.instantkill_group)
-                elif 5 <= tempnum < 7:
-                    freeze_item = Item.FreezeItem(self.player)
-                    self.add_item(freeze_item, var.freeze_group)
-                else:
-                    arrow_kill_item = Item.ArrowAllKillItem(self.player)
-                    self.add_item(arrow_kill_item, var.arrow_kill_group)
+                itemprob = random.randint(0, 10)  # 올라갈떄마다 아이템 추가하도록 업데이트
+                if ItemMode:
+                    if itemprob < 3:
+                        invincible_item = Item.InvincibleItem(self.player)
+                        self.add_item(invincible_item, var.invincible_group)
+                    elif itemprob >= 3 and itemprob < 5:
+                        instantkill_item = Item.InstantkillItem(self.player)
+                        self.add_item(instantkill_item, var.instantkill_group)
+                    elif 5 <= itemprob < 7:
+                        freeze_item = Item.FreezeItem(self.player)
+                        self.add_item(freeze_item, var.freeze_group)
+                    else:
+                        arrow_kill_item = Item.ArrowAllKillItem(self.player)
+                        self.add_item(arrow_kill_item, var.arrow_kill_group)
                 if var.probability[0] > 15:
-                    var.probability[0] -= 3
-                level_up_time += 8000
+                    var.probability[0] -= 2
+                level_up_time += level_up_periods
 
             if self.player.invincible and self.player.invincible_end_time - time.time() > 0:
                 invincible_text = font.render(f"INVINCIBLE!!: {self.player.invincible_end_time - time.time():.3f}sec",

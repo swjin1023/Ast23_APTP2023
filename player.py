@@ -52,16 +52,16 @@ class Player(pygame.sprite.Sprite):
         before = self.rect.center
         # x_before, y_before = self.rect.centerx, self.rect.centery
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT] and status < self.screen_radius ** 2:
+        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and status < self.screen_radius ** 2:
             self.rect.centerx -= self.speed
 
-        if keys[pygame.K_RIGHT] and status < self.screen_radius ** 2:
+        if (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and status < self.screen_radius ** 2:
             self.rect.centerx += self.speed
 
-        if keys[pygame.K_UP] and status < self.screen_radius ** 2:
+        if (keys[pygame.K_UP] or keys[pygame.K_w])and status < self.screen_radius ** 2:
             self.rect.centery -= self.speed
 
-        if keys[pygame.K_DOWN] and status < self.screen_radius ** 2:
+        if (keys[pygame.K_DOWN] or keys[pygame.K_s]) and status < self.screen_radius ** 2:
             self.rect.centery += self.speed
 
         status = (self.rect.centerx - self.center[0]) ** 2 + (self.rect.centery - self.center[1]) ** 2
